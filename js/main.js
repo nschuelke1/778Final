@@ -3,23 +3,39 @@
 // Ensure the script runs only after the page loads
 document.addEventListener("DOMContentLoaded", function () {
 
-    // Initialize the Map using Leaflet.js
-    var map = L.map("map").setView([43.0, -89.5], 7); // Centered over Wisconsin
 
-    // Add a Base Map Layer (OpenStreetMap or Esri)
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap Contributors",
-    }).addTo(map);
 
-    // Add ArcGIS Online API Key (for AGOL integration)
-    const AGOL_API_KEY = "AAPTxy8BH1VEsoebNVZXo8HurA_2jA8sPPf_DuV7jRLl5PwtnXSU0EiBd11SD4M-Bxw0ijY9Rnbq1CTi5xlxNyFji8DGRu0KKLCDqwHVksc_cd45A11yCLF6IS0qeLbPPoLAz_Lb-HlU59LPiRtjGTm8JRkfTU1zLRk6lnCjPZw0qLurNObS9cuNtbfmuGah_zEHj40iGyODgqADtCiqHiuUVKOV6bBXkVGF9GQp2qF_X_KoecZRYMv2u3hz_XOz0WmGAT1_ZrUwUfy9"; 
+// Load ArcGIS Modules using require()
+    require([
+        "esri/config",
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/widgets/Search",
+        "esri/layers/FeatureLayer"
+    ], function(esriConfig, Map, MapView, Search, FeatureLayer) {
 
-    // Connect to ArcGIS Services (Example)
-    var esriLayer = L.esri.dynamicMapLayer({
-        url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer",
-        token: AGOL_API_KEY, // Use the API key for authentication
-    }).addTo(map);
+        // ArcGIS Online API Key
+        esriConfig.apiKey = "YOUR_API_KEY_HERE"; // 🔥 Replace with your actual key
 
-    console.log("Map initialized and AGOL API connected");
+        // Initialize the Map
+        var map = new Map({
+            basemap: "topo-vector" // Esri basemap
+        });
+
+        // Create a Map View
+        var view = new MapView({
+            container: "map",
+            map: map,
+            center: [-89.5, 43.0], // Wisconsin coordinates
+            zoom: 7
+        });
+
+        // Add a Search Widget for location-based queries
+        var searchWidget = new Search({ view: view });
+        view.ui.add(searchWidget, "top-right");
+
+        console.log("Esri map initialized and API connected!");
+
+    });
 
 });
