@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
     ], function(esriConfig, Map, MapView, Search, FeatureLayer) {
 
         // ArcGIS Online API Key
-        esriConfig.apiKey = "YOUR_API_KEY_HERE"; // 🔥 Replace with your actual key
+        esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurA_2jA8sPPf_DuV7jRLl5PwtnXSU0EiBd11SD4M-Bxw0ijY9Rnbq1CTi5xlxNyFji8DGRu0KKLCDqwHVksc_cd45A11yCLF6IS0qeLbPPoLAz_Lb-HlU59LPiRtjGTm8JRkfTU1zLRk6lnCjPZw0qLurNObS9cuNtbfmuGah_zEHj40iGyODgqADtCiqHiuUVKOV6bBXkVGF9GQp2qF_X_KoecZRYMv2u3hz_XOz0WmGAT1_ZrUwUfy9"; // 🔥 Replace with your actual key
 
         // Initialize the Map
         var map = new Map({
