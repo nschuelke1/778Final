@@ -1,5 +1,44 @@
-.countries {
-    fill: #FFF;
-    stroke: #CCC;
-    stroke-width: 2px;
+/* General Styling */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+/* Header Styling */
+header {
+    background: #0077b6; /* Deep blue for contrast */
+    color: white;
+    text-align: center;
+    padding: 1rem;
+    font-size: 1.5rem;
+}
+
+/* Map Container */
+#map {
+    width: 100%;
+    height: 80vh; /* Ensure the map fills most of the screen */
+    border: 2px solid #ccc;
+}
+
+/* Interactive Elements (Buttons, Controls) */
+button {
+    background: #0288d1;
+    color: white;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #01579b;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #map {
+        height: 60vh; /* Adjusts map height for smaller screens */
+    }
 }
