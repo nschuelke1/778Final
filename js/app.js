@@ -6,37 +6,62 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap Contributors",
 }).addTo(map);
 
-// Function to load GeoJSON
-function loadGeoJSON(url, styleOptions) {
+// Declare layer variables
+let riversLayer, watershedsLayer, damsLayer;
+
+// Load GeoJSON function
+function loadGeoJSON(url, styleOptions, callback) {
   fetch(url)
     .then((response) => response.json())
     .then((data) => {
-      L.geoJSON(data, {
+      const layer = L.geoJSON(data, {
+        pointToLayer: function (feature, latlng) {
+          return L.circleMarker(latlng, {
+            radius: 5,
+            color: styleOptions.color || "#000",
+            fillColor: styleOptions.fillColor || styleOptions.color || "#000",
+            fillOpacity: styleOptions.fillOpacity || 0.8,
+            weight: styleOptions.weight || 1
+          });
+        },
         style: styleOptions,
         onEachFeature: function (feature, layer) {
           layer.bindPopup(feature.properties.Name || "No Name");
-        },
-      }).addTo(map);
+        }
+      });
+
+      if (callback) callback(layer);
     })
     .catch((error) => console.error("Error loading GeoJSON:", error));
 }
 
-// Load each dataset with custom styling
-loadGeoJSON("data/Lakes_Large_Rivers.geojson", {
-  color: "#0077b6",
-  weight: 2,
-}); // Blue for water
+// Track when all layers are loaded
+let layersLoaded = 0;
 
-loadGeoJSON("data/Watersheds.geojson", {
-  color: "#34a853",
-  weight: 1,
-  fillOpacity: 0.3,
-}); // Green for watersheds
+function checkAllLayersLoaded() {
+  layersLoaded++;
+  if (layersLoaded === 3) {
+    const overlayMaps = {
+      "Lakes & Rivers": riversLayer,
+      "Watersheds": watershedsLayer,
+      "Dams": damsLayer
+    };
+    L.control.layers(null, overlayMaps, { collapsed: false }).addTo(map);
+  }
+}
 
-loadGeoJSON("data/Wisconsin_Dams.geojson", {
-  color: "#d22e2e",
-  weight: 1,
-  radius: 5, // Only applies to point features if using pointToLayer
-  fillColor: "#d22e2e",
-  fillOpacity: 0.8
+// Load each layer and check when done
+loadGeoJSON("data/Lakes_Large_Rivers.geojson", { color: "#0077b6", weight: 2 }, function (layer) {
+  riversLayer = layer;
+  checkAllLayersLoaded();
+});
+
+loadGeoJSON("data/Watersheds.geojson", { color: "#34a853", weight: 1, fillOpacity: 0.3 }, function (layer) {
+  watershedsLayer = layer;
+  checkAllLayersLoaded();
+});
+
+loadGeoJSON("data/Wisconsin_Dams.geojson", { color: "#d22e2e", weight: 1, fillOpacity: 0.8 }, function (layer) {
+  damsLayer = layer;
+  checkAllLayersLoaded();
 });
