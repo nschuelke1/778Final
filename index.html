@@ -16,9 +16,21 @@
   <header>
     <h1>Dam Impact & Flood Risk Assessment</h1>
   </header>
-  <main>
-    <div id="map"></div>
-  </main>
+  <main id="main-container">
+  <div id="sidebar">
+    <h2>Tools</h2>
+    <button id="bufferToolBtn">Buffer Dam</button>
+    <button id="elevationToolBtn">Compare Elevation</button>
+
+    <h3>Legend</h3>
+    <ul id="legend">
+      <li><span class="legend-color" style="background:#d22e2e;"></span> Dams</li>
+      <li><span class="legend-color" style="background:#34a853;"></span> Watersheds</li>
+      <li><span class="legend-color" style="background:#0077b6;"></span> Lakes & Rivers</li>
+    </ul>
+  </div>
+  <div id="map"></div>
+</main>
   <script src="js/app.js"></script>
 </body>
 </html>
