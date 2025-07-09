@@ -9,16 +9,24 @@
 var map = L.map("map").setView([43.0, -89.5], 7); // Centered over Wisconsin
 
 // Add a base map layer (OpenStreetMap)
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "© OpenStreetMap Contributors",
-}).addTo(map);
+// Define base maps
+const osmBase = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "© OpenStreetMap Contributors"
+});
+
+const satelliteBase = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+  attribution: "© Esri & contributors"
+});
+
+// Set default
+osmBase.addTo(map);
 
 
 /////////////////////////////////////////////////////////////////////////////
 // Add a WMS layer for DEM (Digital Elevation Model) from Wisconsin DNR
 const demLayer = L.esri.imageMapLayer({
   url: "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer",
-  opacity: 0.6,
+  opacity: 0.9,
   attribution: "WI DNR LiDAR DEM"
 });
 
@@ -72,7 +80,12 @@ function checkAllLayersLoaded() {
       "Elevation (LiDAR DEM)": demLayer
     };
 
-    L.control.layers(null, overlayMaps, { collapsed: false }).addTo(map);
+    const baseMaps = {
+  "OpenStreetMap": osmBase,
+  "Satellite": satelliteBase
+};
+
+L.control.layers(baseMaps, overlayMaps, { collapsed: false }).addTo(map);
   }
 }
 
@@ -84,7 +97,7 @@ loadGeoJSON("data/Lakes_Large_Rivers.geojson", { color: "#0077b6", weight: 2 }, 
   checkAllLayersLoaded();
 });
 
-loadGeoJSON("data/Watersheds.geojson", { color: "#34a853", weight: 1, fillOpacity: 0.3 }, function (layer) {
+loadGeoJSON("data/Watersheds.geojson", { color: "#34a853", weight: 1, fillOpacity: 0.2 }, function (layer) {
   watershedsLayer = layer;
   checkAllLayersLoaded();
 });
