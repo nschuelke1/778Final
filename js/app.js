@@ -118,3 +118,34 @@ map.on("zoomend", function () {
     });
   }
 });
+
+
+document.getElementById("bufferToolBtn").addEventListener("click", () => {
+  map.once("click", (e) => {
+    let clickedFeature = null;
+
+    damsLayer.eachLayer((layer) => {
+      if (layer.getLatLng().equals(e.latlng)) {
+        clickedFeature = layer;
+      }
+    });
+
+    if (clickedFeature) {
+      const selectedDistance = parseFloat(document.getElementById("bufferDistance").value);
+
+      if (!isNaN(selectedDistance) && selectedDistance > 0 && selectedDistance <= 20) {
+        const clickedDamGeoJSON = clickedFeature.toGeoJSON();
+
+        const buffer = turf.buffer(clickedDamGeoJSON, selectedDistance, { units: "kilometers" });
+
+        L.geoJSON(buffer, {
+          style: { color: "#ffa500", weight: 2, fillOpacity: 0.4 }
+        }).addTo(map);
+      } else {
+        alert("Please enter a buffer distance between 1 and 20 km.");
+      }
+    } else {
+      alert("Please click directly on a dam.");
+    }
+  });
+});
