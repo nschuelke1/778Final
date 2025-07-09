@@ -6,6 +6,11 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap Contributors",
 }).addTo(map);
 
+function getRadius(zoom) {
+  return Math.max(1.5, zoom * 0.3); // Adjust radius based on zoom level
+}
+
+
 // Declare layer variables
 let riversLayer, watershedsLayer, damsLayer;
 
@@ -16,14 +21,14 @@ function loadGeoJSON(url, styleOptions, callback) {
     .then((data) => {
       const layer = L.geoJSON(data, {
         pointToLayer: function (feature, latlng) {
-          return L.circleMarker(latlng, {
-            radius: 5,
-            color: styleOptions.color || "#000",
-            fillColor: styleOptions.fillColor || styleOptions.color || "#000",
-            fillOpacity: styleOptions.fillOpacity || 0.8,
-            weight: styleOptions.weight || 1
-          });
-        },
+            return L.circleMarker(latlng, {
+                radius: getRadius(map.getZoom()),
+                color: styleOptions.color || "#000",
+                fillColor: styleOptions.fillColor || styleOptions.color || "#000",
+                fillOpacity: styleOptions.fillOpacity || 0.8,
+                weight: styleOptions.weight || 1
+            });
+            },
         style: styleOptions,
         onEachFeature: function (feature, layer) {
           layer.bindPopup(feature.properties.Name || "No Name");
@@ -64,4 +69,14 @@ loadGeoJSON("data/Watersheds.geojson", { color: "#34a853", weight: 1, fillOpacit
 loadGeoJSON("data/Wisconsin_Dams.geojson", { color: "#d22e2e", weight: 1, fillOpacity: 0.8 }, function (layer) {
   damsLayer = layer;
   checkAllLayersLoaded();
+});
+
+map.on("zoomend", function () {
+  if (damsLayer) {
+    damsLayer.eachLayer(function (layer) {
+      if (layer.setRadius) {
+        layer.setRadius(getRadius(map.getZoom()));
+      }
+    });
+  }
 });
