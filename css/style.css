@@ -1,6 +1,4 @@
-/* ============================
-   General Styling
-============================ */
+/* General Styling */
 body {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -8,9 +6,7 @@ body {
   background-color: #f4f4f4;
 }
 
-/* ============================
-   Header Styling
-============================ */
+/* Header Styling */
 header {
   background: #0077b6; /* Deep blue for contrast */
   color: white;
@@ -19,9 +15,8 @@ header {
   font-size: 1.5rem;
 }
 
-/* ============================
-   Layout: Sidebar + Map
-============================ */
+
+/* Layout: Sidebar + Map */
 #main-container {
   display: flex;
   height: 80vh;
@@ -41,9 +36,7 @@ header {
   border: 2px solid #ccc;
 }
 
-/* ============================
-   Sidebar Content
-============================ */
+/* Sidebar Content */
 #sidebar h2,
 #sidebar h3 {
   margin-top: 0;
@@ -65,9 +58,7 @@ header {
   background: #01579b;
 }
 
-/* ============================
-   Legend Styling
-============================ */
+/* Legend Styling */
 #legend {
   list-style: none;
   padding: 0;
@@ -87,9 +78,7 @@ header {
   border: 1px solid #ccc;
 }
 
-/* ============================
-   Responsive Design
-============================ */
+/* Responsive Design */
 @media (max-width: 768px) {
   #main-container {
     flex-direction: column;

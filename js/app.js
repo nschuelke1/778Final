@@ -1,3 +1,10 @@
+// Nathan Schuelke
+// 778 Final Project
+// Dam Impact and Flood Risk Assessment
+
+
+
+
 // Initialize the map
 var map = L.map("map").setView([43.0, -89.5], 7); // Centered over Wisconsin
 
@@ -6,11 +13,22 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap Contributors",
 }).addTo(map);
 
+
+/////////////////////////////////////////////////////////////////////////////
+// Add a WMS layer for DEM (Digital Elevation Model) from Wisconsin DNR
+const demLayer = L.esri.imageMapLayer({
+  url: "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer",
+  opacity: 0.6,
+  attribution: "WI DNR LiDAR DEM"
+});
+
+
+/////////////////////////////////////////////////////////////////////////////
 function getRadius(zoom) {
   return Math.max(1.5, zoom * 0.3); // Adjust radius based on zoom level
 }
 
-
+/////////////////////////////////////////////////////////////////////////////
 // Declare layer variables
 let riversLayer, watershedsLayer, damsLayer;
 
@@ -40,6 +58,7 @@ function loadGeoJSON(url, styleOptions, callback) {
     .catch((error) => console.error("Error loading GeoJSON:", error));
 }
 
+/////////////////////////////////////////////////////////////////////////////
 // Track when all layers are loaded
 let layersLoaded = 0;
 
@@ -49,12 +68,16 @@ function checkAllLayersLoaded() {
     const overlayMaps = {
       "Lakes & Rivers": riversLayer,
       "Watersheds": watershedsLayer,
-      "Dams": damsLayer
+      "Dams": damsLayer,
+      "Elevation (LiDAR DEM)": demLayer
     };
+
     L.control.layers(null, overlayMaps, { collapsed: false }).addTo(map);
   }
 }
 
+
+/////////////////////////////////////////////////////////////////////////////
 // Load each layer and check when done
 loadGeoJSON("data/Lakes_Large_Rivers.geojson", { color: "#0077b6", weight: 2 }, function (layer) {
   riversLayer = layer;
@@ -71,6 +94,8 @@ loadGeoJSON("data/Wisconsin_Dams.geojson", { color: "#d22e2e", weight: 1, fillOp
   checkAllLayersLoaded();
 });
 
+
+/////////////////////////////////////////////////////////////////////////////
 map.on("zoomend", function () {
   if (damsLayer) {
     damsLayer.eachLayer(function (layer) {
