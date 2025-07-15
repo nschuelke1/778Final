@@ -40,30 +40,48 @@ function getRadius(zoom) {
 // Declare layer variables
 let riversLayer, watershedsLayer, damsLayer;
 
-// Load GeoJSON function
+// Declare bufferLayer to track the buffer polygon on the map
+let bufferLayer = null;
+
+
+// --- Function to load a GeoJSON file and apply styling and popup logic
 function loadGeoJSON(url, styleOptions, callback) {
+
+  // Fetch the GeoJSON file from the provided URL
   fetch(url)
-    .then((response) => response.json())
+    .then((response) => response.json()) // Parse the response as JSON
     .then((data) => {
+
+      // Create a Leaflet GeoJSON layer using the loaded data
       const layer = L.geoJSON(data, {
+
+        // For point features (like dams), convert them to circle markers
         pointToLayer: function (feature, latlng) {
-            return L.circleMarker(latlng, {
-                radius: getRadius(map.getZoom()),
-                color: styleOptions.color || "#000",
-                fillColor: styleOptions.fillColor || styleOptions.color || "#000",
-                fillOpacity: styleOptions.fillOpacity || 0.8,
-                weight: styleOptions.weight || 1
-            });
-            },
+          return L.circleMarker(latlng, {
+
+            // Radius adjusts based on zoom level for visibility
+            radius: getRadius(map.getZoom()),
+
+            // Apply custom color and fill settings from styleOptions
+            color: styleOptions.color || "#000",
+            fillColor: styleOptions.fillColor || styleOptions.color || "#000",
+            fillOpacity: styleOptions.fillOpacity || 0.8,
+            weight: styleOptions.weight || 1
+          });
+        },
+
+        // Apply styling to line and polygon features
         style: styleOptions,
-        onEachFeature: function (feature, layer) {
-          layer.bindPopup(feature.properties.Name || "No Name");
-        }
+        
+        // Bind popups only if onEachFeature is provided in styleOptions
+        // This prevents automatic popup binding unless explicitly requested (e.g. for watersheds)
+        onEachFeature: styleOptions.onEachFeature || null
       });
 
+      // If a callback function was provided, pass the layer back
       if (callback) callback(layer);
     })
-    .catch((error) => console.error("Error loading GeoJSON:", error));
+    .catch((error) => console.error("Error loading GeoJSON:", error)); // Log any loading errors
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -90,6 +108,8 @@ L.control.layers(baseMaps, overlayMaps, { collapsed: false }).addTo(map);
 }
 
 
+
+
 /////////////////////////////////////////////////////////////////////////////
 // Load each layer and check when done
 loadGeoJSON("data/Lakes_Large_Rivers.geojson", { color: "#0077b6", weight: 2 }, function (layer) {
@@ -108,6 +128,8 @@ loadGeoJSON("data/Wisconsin_Dams.geojson", { color: "#d22e2e", weight: 1, fillOp
 });
 
 
+
+
 /////////////////////////////////////////////////////////////////////////////
 map.on("zoomend", function () {
   if (damsLayer) {
@@ -119,39 +141,12 @@ map.on("zoomend", function () {
   }
 });
 
-
-document.getElementById("bufferToolBtn").addEventListener("click", () => {
-  map.once("click", (e) => {
-    let clickedFeature = null;
-
-    damsLayer.eachLayer((layer) => {
-      if (layer.getLatLng().equals(e.latlng)) {
-        clickedFeature = layer;
-      }
-    });
-
-    if (clickedFeature) {
-      const selectedDistance = parseFloat(document.getElementById("bufferDistance").value);
-
-      if (!isNaN(selectedDistance) && selectedDistance > 0 && selectedDistance <= 20) {
-        const clickedDamGeoJSON = clickedFeature.toGeoJSON();
-
-        const buffer = turf.buffer(clickedDamGeoJSON, selectedDistance, { units: "kilometers" });
-
-        L.geoJSON(buffer, {
-          style: { color: "#ffa500", weight: 2, fillOpacity: 0.4 }
-        }).addTo(map);
-      } else {
-        alert("Please enter a buffer distance between 1 and 20 km.");
-      }
-    } else {
-      alert("Please click directly on a dam.");
-    }
-  });
-});
+function isCloseEnough(clickLatLng, layerLatLng, thresholdMeters = 20) {
+  return clickLatLng.distanceTo(layerLatLng) <= thresholdMeters;
+}
 
 
-/////////////////////////////////////////////////////////////////////////////
+//////BUFFER LOGIC////////////////////////////////////////////////////////////
 // Listen for when the user clicks the "Buffer Dam" button
 document.getElementById("bufferToolBtn").addEventListener("click", () => {
 
@@ -163,7 +158,7 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
     damsLayer.eachLayer((layer) => {
       // Check if the clicked map location matches a dam location
       // (This uses exact coordinates; you can later improve with proximity detection)
-      if (layer.getLatLng().equals(e.latlng)) {
+      if (isCloseEnough(e.latlng, layer.getLatLng())) {
         clickedFeature = layer;
       }
     });
