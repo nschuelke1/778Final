@@ -149,3 +149,50 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
     }
   });
 });
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Listen for when the user clicks the "Buffer Dam" button
+document.getElementById("bufferToolBtn").addEventListener("click", () => {
+
+  // Once the user clicks on the map, run this function once
+  map.once("click", (e) => {
+    let clickedFeature = null; // We'll store the clicked dam here
+
+    // Loop through each dam feature in the layer
+    damsLayer.eachLayer((layer) => {
+      // Check if the clicked map location matches a dam location
+      // (This uses exact coordinates; you can later improve with proximity detection)
+      if (layer.getLatLng().equals(e.latlng)) {
+        clickedFeature = layer;
+      }
+    });
+
+    // If a dam was clicked...
+    if (clickedFeature) {
+      // Read the buffer distance the user entered in the input box (e.g., 5 or 10 km)
+      const selectedDistance = parseFloat(document.getElementById("bufferDistance").value);
+
+      // Validate the input: make sure it's a number between 1 and 20 km
+      if (!isNaN(selectedDistance) && selectedDistance > 0 && selectedDistance <= 20) {
+        // Convert the clicked dam to a GeoJSON object (needed for Turf.js)
+        const damGeoJSON = clickedFeature.toGeoJSON();
+
+        // Generate a buffer polygon around the dam using Turf.js
+        const buffer = turf.buffer(damGeoJSON, selectedDistance, { units: "kilometers" });
+
+        // Add the buffer polygon to the map and style it orange with some transparency
+        L.geoJSON(buffer, {
+          style: { color: "#ffa500", weight: 2, fillOpacity: 0.4 }
+        }).addTo(map);
+      } else {
+        // Warn the user if they entered an invalid distance
+        alert("Please enter a buffer distance between 1 and 20 km.");
+      }
+
+    } else {
+      // If no dam was clicked (e.g., clicked empty space), show a message
+      alert("Please click directly on a dam.");
+    }
+  });
+});
