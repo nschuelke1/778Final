@@ -111,12 +111,12 @@ loadGeoJSON("data/Wisconsin_Dams.geojson", { color: "#d22e2e", weight: 1, fillOp
 
 // Load Public Schools
 loadGeoJSON("data/PublicSchools.geojson", {
-  color: "#1e90ff", // Blue color for public schools
-  radius: 2,        // Marker size
+  color: "#1e90ff", 
+  radius: 2,        
   fillOpacity: 0.7,
   onEachFeature: function (feature, layer) {
-    feature.properties.school_type = "Public"; // Tag for later use
-    layer.bindPopup(`${feature.properties.name} (Public)`); // Clickable popup
+    feature.properties.school_type = "Public"; 
+    layer.bindPopup(`${feature.properties.name} (Public)`); 
   }
 }, function (layer) {
   // Add each school marker into the unified school layer group
@@ -127,7 +127,7 @@ loadGeoJSON("data/PublicSchools.geojson", {
 
 //Load Private Schools
 loadGeoJSON("data/PrivateSchools.geojson", {
-  color: "#ff7f50", 
+  color: "#1e90ff", 
   radius: 2,
   fillOpacity: 0.7,
   onEachFeature: function (feature, layer) {
