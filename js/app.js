@@ -40,48 +40,13 @@ let bufferLayer = null;
 let layersLoaded = 0;
 let schoolLayerGroup = L.layerGroup();
 let hospitalsLayer;
-let parcelLayer;
 
 
-
-/////////////////////////////////////////////////////////////////////////////
-// Parcel Visibility on Zoom Control
-map.on("zoomend", function () {
-  const currentZoom = map.getZoom();
-
-  if (currentZoom >= 13) {
-    if (!map.hasLayer(parcelLayer)) {
-      parcelLayer.addTo(map); // Add parcel layer at high zoom
-    }
-  } else {
-    if (map.hasLayer(parcelLayer)) {
-      map.removeLayer(parcelLayer); // Remove parcel layer at low zoom
-    }
-  }
-});
-
-
-
-
-// === Control Parcel Visibility Based on Zoom
-map.on("zoomend", function () {
-  const currentZoom = map.getZoom();
-
-  if (currentZoom >= 13) {
-    if (!map.hasLayer(parcelLayer)) {
-      parcelLayer.addTo(map); // Add parcel layer at high zoom
-    }
-  } else {
-    if (map.hasLayer(parcelLayer)) {
-      map.removeLayer(parcelLayer); // Remove parcel layer at low zoom
-    }
-  }
-});
 
 
 
 /////////////////////////////////////////////////////////////////////////////
-// --- Function to load a GeoJSON file and apply styling and popup logic
+// Function to load a GeoJSON file and apply styling and popup logic
 function loadGeoJSON(url, styleOptions, callback) {
 
   // Fetch the GeoJSON file from the provided URL
@@ -147,7 +112,7 @@ loadGeoJSON("data/Wisconsin_Dams.geojson", { color: "#d22e2e", weight: 1, fillOp
 // Load Public Schools
 loadGeoJSON("data/PublicSchools.geojson", {
   color: "#1e90ff", // Blue color for public schools
-  radius: 6,        // Marker size
+  radius: 2,        // Marker size
   fillOpacity: 0.7,
   onEachFeature: function (feature, layer) {
     feature.properties.school_type = "Public"; // Tag for later use
@@ -157,28 +122,27 @@ loadGeoJSON("data/PublicSchools.geojson", {
   // Add each school marker into the unified school layer group
   layer.eachLayer(l => schoolLayerGroup.addLayer(l));
 
-  // Optional: trigger layer control setup if you're tracking load progress
   checkAllLayersLoaded();
 });
 
 //Load Private Schools
 loadGeoJSON("data/PrivateSchools.geojson", {
-  color: "#ff7f50", // Coral color for private schools
-  radius: 6,
+  color: "#ff7f50", 
+  radius: 2,
   fillOpacity: 0.7,
   onEachFeature: function (feature, layer) {
-    feature.properties.school_type = "Private"; // Tag for later use
-    layer.bindPopup(`${feature.properties.name} (Private)`); // Clickable popup
+    feature.properties.school_type = "Private"; 
+    layer.bindPopup(`${feature.properties.name} (Private)`); 
   }
 }, function (layer) {
-  layer.eachLayer(l => schoolLayerGroup.addLayer(l)); // Add to same group
+  layer.eachLayer(l => schoolLayerGroup.addLayer(l)); 
   checkAllLayersLoaded();
 });
 
 // Load Hospitals
 loadGeoJSON("data/WisconsinHospitals.geojson", {
   color: "#ffa500",      
-  radius: 8,             
+  radius: 2,             
   fillOpacity: 0.7,
   onEachFeature: function (feature, layer) {
     layer.bindPopup(`${name}`);
@@ -186,7 +150,6 @@ loadGeoJSON("data/WisconsinHospitals.geojson", {
 }, function (layer) {
   // Add to global hospitalsLayer so it appears in overlay controls
   hospitalsLayer = layer;
-  hospitalsLayer.addTo(map);
   checkAllLayersLoaded();
 });
 
@@ -198,24 +161,7 @@ const demLayer = L.esri.imageMapLayer({
 });
 
 
-// Load Wisconsin Parcels REST
-parcelLayer = L.esri.featureLayer({
-  url: "https://services3.arcgis.com/n6uYoouQZW75n5WI/arcgis/rest/services/Wisconsin_Statewide_Parcels/FeatureServer/0",
-  style: function () {
-    return {
-      color: "#888",
-      weight: 0.5,
-      fillOpacity: 0.1
-    };
-  },
-  onEachFeature: function (feature, layer) {
-    const address = feature.properties.SITEADDRESS || "No address listed";
-    layer.bindPopup(`🏠 Parcel Address: ${address}`);
-  }
-});
 
-// Optional: Add to map now or wait for toggle
-// parcelLayer.addTo(map);
 
 function checkAllLayersLoaded() {
   layersLoaded++;
@@ -227,7 +173,7 @@ function checkAllLayersLoaded() {
       "Elevation (LiDAR DEM)": demLayer,
       "Schools": schoolLayerGroup,
       "Hospitals": hospitalsLayer,
-      "Parcels": parcelLayer
+      
     };
 
     const baseMaps = {
