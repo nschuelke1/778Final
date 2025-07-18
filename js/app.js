@@ -44,6 +44,41 @@ let parcelLayer;
 
 
 
+/////////////////////////////////////////////////////////////////////////////
+// Parcel Visibility on Zoom Control
+map.on("zoomend", function () {
+  const currentZoom = map.getZoom();
+
+  if (currentZoom >= 13) {
+    if (!map.hasLayer(parcelLayer)) {
+      parcelLayer.addTo(map); // Add parcel layer at high zoom
+    }
+  } else {
+    if (map.hasLayer(parcelLayer)) {
+      map.removeLayer(parcelLayer); // Remove parcel layer at low zoom
+    }
+  }
+});
+
+
+
+
+// === Control Parcel Visibility Based on Zoom
+map.on("zoomend", function () {
+  const currentZoom = map.getZoom();
+
+  if (currentZoom >= 13) {
+    if (!map.hasLayer(parcelLayer)) {
+      parcelLayer.addTo(map); // Add parcel layer at high zoom
+    }
+  } else {
+    if (map.hasLayer(parcelLayer)) {
+      map.removeLayer(parcelLayer); // Remove parcel layer at low zoom
+    }
+  }
+});
+
+
 
 /////////////////////////////////////////////////////////////////////////////
 // --- Function to load a GeoJSON file and apply styling and popup logic
