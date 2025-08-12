@@ -4,39 +4,40 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dam Impact Assessment</title>
+
+  <!-- Styles -->
   <link rel="stylesheet" href="css/style.css" />
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
   <script src="https://unpkg.com/esri-leaflet@3.0.8/dist/esri-leaflet.js"></script>
+  <script src="https://unpkg.com/esri-leaflet-raster@3.0.0/dist/esri-leaflet-raster.js"></script> <!-- ✅ Added this line -->
 </head>
 <body>
   <header>
     <h1>Dam Impact & Flood Risk Assessment</h1>
   </header>
   <main id="main-container">
-  <div id="sidebar">
-    <h2>Tools</h2>
-    <button id="bufferToolBtn">Buffer Dam</button>
-    <label for="bufferDistance">Buffer Distance (km):</label>
-    <input type="number" id="bufferDistance" min="1" max="20" value="5" />
-      <option value="1-20">1-20 km</option>
-      
-    </select>
-    <button id="elevationToolBtn">Compare Elevation</button>
+    <div id="sidebar">
+      <h2>Tools</h2>
+      <button id="bufferToolBtn">Buffer Dam</button>
+      <label for="bufferDistance">Buffer Distance (km):</label>
+      <input type="number" id="bufferDistance" min="1" max="20" value="5" />
+      <button id="elevationToolBtn">Compare Elevation</button>
 
-    <h3>Legend</h3>
-    <ul id="legend">
-      <li><span class="legend-color" style="background:#d22e2e;"></span> Dams</li>
-      <li><span class="legend-color" style="background:#34a853;"></span> Watersheds</li>
-      <li><span class="legend-color" style="background:#0077b6;"></span> Lakes & Rivers</li>
-    </ul>
-  </div>
-  <div id="map"></div>
-</main>
+      <h3>Legend</h3>
+      <ul id="legend">
+        <li><span class="legend-color" style="background:#d22e2e;"></span> Dams</li>
+        <li><span class="legend-color" style="background:#34a853;"></span> Watersheds</li>
+        <li><span class="legend-color" style="background:#0077b6;"></span> Lakes & Rivers</li>
+      </ul>
+    </div>
+    <div id="map"></div>
+  </main>
+
+  <!-- App Script -->
   <script src="js/app.js"></script>
 </body>
 </html>
