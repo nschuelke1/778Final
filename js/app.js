@@ -43,6 +43,7 @@ let hospitalsLayer;
 let parcelLayer = L.layerGroup().addTo(map);
 let elevationPoints = [];
 let elevationMarkers = [];
+let parcelGeoJSON;
 
 
 
@@ -214,9 +215,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (clearBtn) {
     clearBtn.addEventListener("click", () => {
+      // Remove buffer layer if present
       if (map.hasLayer(bufferLayer)) {
         map.removeLayer(bufferLayer);
       }
+
+      // Clear parcel layer group
       if (map.hasLayer(parcelLayer)) {
         map.removeLayer(parcelLayer);
       }
@@ -224,13 +228,48 @@ document.addEventListener("DOMContentLoaded", () => {
       bufferLayer = null;
       parcelLayer.clearLayers(); // Since it's a LayerGroup
 
-      console.log("Buffer and parcel layers cleared.");
+      // Clear the results table
+      const resultsTableBody = document.querySelector("#resultsTable tbody");
+      if (resultsTableBody) {
+        resultsTableBody.innerHTML = "";
+      }
+
+      console.log("Buffer and parcel layers cleared. Table reset.");
     });
   } else {
     console.warn("Clear Results button not found in DOM.");
   }
 });
 
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Display Parcel Summary in Table
+function displayParcelSummary(features) {
+  let totalValue = 0;
+  let totalAcres = 0;
+
+  features.forEach((feature) => {
+    const props = feature.properties;
+
+    const value = parseFloat(props.ESTFMKVALUE);
+    const acres = parseFloat(props.GISACRES);
+
+    if (!isNaN(value)) totalValue += value;
+    if (!isNaN(acres)) totalAcres += acres;
+  });
+
+  const tbody = document.querySelector("#resultsTable tbody");
+  tbody.innerHTML = ""; // Clear all rows
+
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td><strong>${totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</strong></td>
+    <td><strong>${totalAcres.toFixed(2)}</strong></td>
+  `;
+  tbody.appendChild(row);
+}
 
 
 //////BUFFER TOOL WITH PARCEL QUERY///////////////////////////
@@ -289,6 +328,9 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
           }).addTo(map);
 
           console.log("Parcels found:", featureCollection.features.length);
+
+          // Display summary table
+          displayParcelSummary(featureCollection.features);
         });
 
       } else {
@@ -302,6 +344,8 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
 });
 
 
+
+displayParcelSummary(parcelGeoJSON.features);
 
 ////// ELEVATION TOOL //////////////////////////////////////////////////
 

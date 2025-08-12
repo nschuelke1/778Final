@@ -94,3 +94,40 @@ header {
     height: 60vh;
   }
 }
+
+#resultsContainer {
+  position: absolute;
+  top: 380px;
+  right: 10px;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  z-index: 1000;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  max-width: 250px;
+}
+
+#resultsContainer h3 {
+  margin: 0 0 6px 0;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+#resultsTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#resultsTable th,
+#resultsTable td {
+  padding: 4px 6px;
+  text-align: left;
+  font-size: 13px;
+}
+
+#resultsTable th {
+  background-color: #f0f0f0;
+  font-weight: 600;
+}
