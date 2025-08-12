@@ -318,43 +318,40 @@ function handleElevationClickSimple(e) {
     map.off("click", handleElevationClickSimple); // Stop listening for clicks
 
     // Query elevation for the first point using static identify method
-    L.esri.ImageService.identify({
-      url: "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer"
-    })
-    .geometry(elevationClicks[0]) // First clicked location
-    .returnPixelValues(true)      // Request elevation value
-    .run(function(err1, result1) {
-      if (err1 || !result1.pixelValues || result1.pixelValues.length === 0) {
-        alert("Could not get elevation for first point.");
-        return;
-      }
+    // Create the ImageService instance once
+var elevationService = L.esri.ImageService({
+  url: "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer"
+});
 
-      // Query elevation for the second point
-      L.esri.ImageService.identify({
-        url: "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer"
-      })
-      .geometry(elevationClicks[1]) // Second clicked location
-      .returnPixelValues(true)      // Request elevation value
+// Inside your click handler, use elevationService.identify()
+elevationService.identify()
+  .geometry(elevationClicks[0])
+  .returnPixelValues(true)
+  .run(function(err1, result1) {
+    if (err1 || !result1.pixelValues || result1.pixelValues.length === 0) {
+      alert("Could not get elevation for first point.");
+      return;
+    }
+
+    elevationService.identify()
+      .geometry(elevationClicks[1])
+      .returnPixelValues(true)
       .run(function(err2, result2) {
         if (err2 || !result2.pixelValues || result2.pixelValues.length === 0) {
           alert("Could not get elevation for second point.");
           return;
         }
 
-        // Extract elevation values
         var elev1 = result1.pixelValues[0].value;
         var elev2 = result2.pixelValues[0].value;
-
-        // Calculate elevation change
         var change = elev2 - elev1;
 
-        // Show results in an alert
         alert("Elevation Comparison (ft):\n" +
               "Point 1: " + elev1.toFixed(2) + "\n" +
               "Point 2: " + elev2.toFixed(2) + "\n" +
               "Change: " + change.toFixed(2) + " ft");
       });
-    });
+  });
   }
 }
 
