@@ -208,6 +208,30 @@ function isCloseEnough(clickLatLng, layerLatLng, thresholdMeters = 20) {
 
 
 
+// Clear Results Button Logic
+document.addEventListener("DOMContentLoaded", () => {
+  const clearBtn = document.getElementById("clearResultsBtn");
+
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      if (map.hasLayer(bufferLayer)) {
+        map.removeLayer(bufferLayer);
+      }
+      if (map.hasLayer(parcelLayer)) {
+        map.removeLayer(parcelLayer);
+      }
+
+      bufferLayer = null;
+      parcelLayer.clearLayers(); // Since it's a LayerGroup
+
+      console.log("Buffer and parcel layers cleared.");
+    });
+  } else {
+    console.warn("Clear Results button not found in DOM.");
+  }
+});
+
+
 
 //////BUFFER TOOL WITH PARCEL QUERY///////////////////////////
 
@@ -281,47 +305,57 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
 
 ////// ELEVATION TOOL //////////////////////////////////////////////////
 
-// This function asks Wisconsin's elevation service for the elevation (in feet) at a specific location
+// This function gets the elevation (in feet) for a single point using Wisconsin's DEM identify endpoint
 function queryElevation(location, callback) {
-  // The web address of the elevation service
+  // The identify endpoint for elevation queries
   const elevationServiceURL = "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer/identify";
 
-  // Show the coordinates we're checking
+  // Log the coordinates being queried
   console.log("Checking elevation at:", location.lat, location.lng);
 
-  // Build the settings for our request
+  // Build the query parameters for the request
   const settings = new URLSearchParams({
-    f: "json", // Ask for the response in JSON format
-    geometry: `${location.lng},${location.lat}`, // ArcGIS expects longitude first, then latitude
-    geometryType: "esriGeometryPoint", // We're sending a single point
-    returnPixelValues: "true" // Ask for the elevation value at that point
+    geometry: `${location.lng},${location.lat}`, // ArcGIS expects longitude first
+    geometryType: "esriGeometryPoint", // We're sending a point
+    returnPixelValues: "true", // Ask for elevation value
+    returnGeometry: "true", // Try enabling geometry return
+    f: "json", // Ask for JSON format
+    sr: "4326" // Use WGS84 (lat/lng)
   });
 
-  // Send the request to the elevation service
-  fetch(elevationServiceURL + "?" + settings.toString())
-    .then(response => {
-      console.log("Got a response from the elevation service");
-      return response.json(); // Convert the response into usable data
-    })
-    .then(data => {
-      console.log("Elevation data received:", data); // Show the full response
+  // Build the full request URL
+  const fullURL = elevationServiceURL + "?" + settings.toString();
+  console.log("Requesting elevation from:", fullURL);
 
-      // Check if we got a valid elevation value
+  // Send the request
+  fetch(fullURL)
+    .then(response => response.json())
+    .then(data => {
+      console.log("Elevation data received:", data);
+
+      if (data.error) {
+        console.error("Service error:", data.error);
+        callback("Elevation service returned an error");
+        return;
+      }
+
       if (data.pixelValues && data.pixelValues.length > 0 && data.pixelValues[0].value !== "NoData") {
-        const elevation = parseFloat(data.pixelValues[0].value); // Convert to a number
+        const elevation = parseFloat(data.pixelValues[0].value);
         console.log("Elevation value found:", elevation);
-        callback(null, elevation); // Send it back with no error
+        callback(null, elevation);
       } else {
         console.warn("No elevation value found at this location");
         callback("No elevation value found at this location");
       }
     })
     .catch(error => {
-      console.error("Problem getting elevation:", error); // Show any errors
-      callback(error); // Send the error back
+      console.error("Problem getting elevation:", error);
+      callback(error);
     });
 }
 
+
+// Global variables to store elevation clicks and markers
 // This function starts the elevation tool when the button is clicked
 function startElevationTool() {
   // Clear any previous clicks and markers
