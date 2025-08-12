@@ -281,7 +281,7 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
 
 //////ELEVATION TOOL//////////////////////////////////////////////////
 
-// Lets user click two points and compares elevation
+// Lets the user click two points and compare elevation
 // Starts the elevation tool when the button is clicked
 function startElevationTool() {
   // Clear previous clicks and markers
@@ -291,7 +291,7 @@ function startElevationTool() {
   });
   elevationMarkers = [];
 
-  // Tells user to click two points
+  // Prompt user to click two points
   alert("Click two points on the map to compare elevation.");
 
   // Listen for map clicks
@@ -313,51 +313,50 @@ function handleElevationClickSimple(e) {
 
   elevationClicks.push(latlng); // Store the clicked location
 
-  // Once two points are clicked, query elevation
+  // Once two points are clicked, stop listening and query elevation
   if (elevationClicks.length === 2) {
     map.off("click", handleElevationClickSimple); // Stop listening for clicks
 
-    // Set up the elevation image service
-    var service = L.esri.imageService({
+    // Query elevation for the first point using static identify method
+    L.esri.ImageService.identify({
       url: "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer"
-    });
+    })
+    .geometry(elevationClicks[0]) // First clicked location
+    .returnPixelValues(true)      // Request elevation value
+    .run(function(err1, result1) {
+      if (err1 || !result1.pixelValues || result1.pixelValues.length === 0) {
+        alert("Could not get elevation for first point.");
+        return;
+      }
 
-    // Query elevation for the first point
-    service.identify()
-      .geometry(elevationClicks[0]) // First clicked location
+      // Query elevation for the second point
+      L.esri.ImageService.identify({
+        url: "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer"
+      })
+      .geometry(elevationClicks[1]) // Second clicked location
       .returnPixelValues(true)      // Request elevation value
-      .run(function(err1, result1) {
-        if (err1 || !result1.pixelValues || result1.pixelValues.length === 0) {
-          alert("Could not get elevation for first point.");
+      .run(function(err2, result2) {
+        if (err2 || !result2.pixelValues || result2.pixelValues.length === 0) {
+          alert("Could not get elevation for second point.");
           return;
         }
 
-        // Query elevation for the second point
-        service.identify()
-          .geometry(elevationClicks[1]) // Second clicked location
-          .returnPixelValues(true)      // Request elevation value
-          .run(function(err2, result2) {
-            if (err2 || !result2.pixelValues || result2.pixelValues.length === 0) {
-              alert("Could not get elevation for second point.");
-              return;
-            }
+        // Extract elevation values
+        var elev1 = result1.pixelValues[0].value;
+        var elev2 = result2.pixelValues[0].value;
 
-            // Extract elevation values
-            var elev1 = result1.pixelValues[0].value;
-            var elev2 = result2.pixelValues[0].value;
+        // Calculate elevation change
+        var change = elev2 - elev1;
 
-            // Calculate elevation change
-            var change = elev2 - elev1;
-
-            // Show results in an alert
-            alert("Elevation Comparison (ft):\n" +
-                  "Point 1: " + elev1.toFixed(2) + "\n" +
-                  "Point 2: " + elev2.toFixed(2) + "\n" +
-                  "Change: " + change.toFixed(2) + " ft");
-          }); // End of second elevation query
-      }); // End of first elevation query
-  } // End of if block for two clicks
-} // End of handleElevationClickSimple function
+        // Show results in an alert
+        alert("Elevation Comparison (ft):\n" +
+              "Point 1: " + elev1.toFixed(2) + "\n" +
+              "Point 2: " + elev2.toFixed(2) + "\n" +
+              "Change: " + change.toFixed(2) + " ft");
+      });
+    });
+  }
+}
 
 // Connect the elevation tool to the button
 document.getElementById("elevationToolBtn").addEventListener("click", startElevationTool);
