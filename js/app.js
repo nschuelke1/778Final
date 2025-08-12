@@ -279,81 +279,122 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
 
 
 
-//////ELEVATION TOOL//////////////////////////////////////////////////
+////// ELEVATION TOOL //////////////////////////////////////////////////
 
-// Lets the user click two points and compare elevation
-// Starts the elevation tool when the button is clicked
+// This function asks Wisconsin's elevation service for the elevation (in feet) at a specific location
+function queryElevation(location, callback) {
+  // The web address of the elevation service
+  const elevationServiceURL = "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer/identify";
+
+  // Show the coordinates we're checking
+  console.log("Checking elevation at:", location.lat, location.lng);
+
+  // Build the settings for our request
+  const settings = new URLSearchParams({
+    f: "json", // Ask for the response in JSON format
+    geometry: `${location.lng},${location.lat}`, // ArcGIS expects longitude first, then latitude
+    geometryType: "esriGeometryPoint", // We're sending a single point
+    returnPixelValues: "true" // Ask for the elevation value at that point
+  });
+
+  // Send the request to the elevation service
+  fetch(elevationServiceURL + "?" + settings.toString())
+    .then(response => {
+      console.log("Got a response from the elevation service");
+      return response.json(); // Convert the response into usable data
+    })
+    .then(data => {
+      console.log("Elevation data received:", data); // Show the full response
+
+      // Check if we got a valid elevation value
+      if (data.pixelValues && data.pixelValues.length > 0 && data.pixelValues[0].value !== "NoData") {
+        const elevation = parseFloat(data.pixelValues[0].value); // Convert to a number
+        console.log("Elevation value found:", elevation);
+        callback(null, elevation); // Send it back with no error
+      } else {
+        console.warn("No elevation value found at this location");
+        callback("No elevation value found at this location");
+      }
+    })
+    .catch(error => {
+      console.error("Problem getting elevation:", error); // Show any errors
+      callback(error); // Send the error back
+    });
+}
+
+// This function starts the elevation tool when the button is clicked
 function startElevationTool() {
-  // Clear previous clicks and markers
+  // Clear any previous clicks and markers
   elevationClicks = [];
   elevationMarkers.forEach(function(marker) {
     map.removeLayer(marker); // Remove old markers from the map
   });
   elevationMarkers = [];
 
-  // Prompt user to click two points
+  // Tell the user what to do
   alert("Click two points on the map to compare elevation.");
 
-  // Listen for map clicks
+  // Start listening for map clicks
   map.on("click", handleElevationClickSimple);
 }
 
-// Handles each map click
+// This function handles each map click during elevation tool use
 function handleElevationClickSimple(e) {
-  var latlng = e.latlng; // Get the clicked location
+  const clickedLocation = e.latlng; // Get the location that was clicked
 
-  // Add a blue marker where the user clicked
-  var marker = L.circleMarker(latlng, {
+  // Add a blue marker at the clicked point
+  const marker = L.circleMarker(clickedLocation, {
     radius: 6,
     color: "blue",
     fillColor: "blue",
     fillOpacity: 0.6
   }).addTo(map);
-  elevationMarkers.push(marker); // Store the marker
 
-  elevationClicks.push(latlng); // Store the clicked location
+  // Save the marker and location
+  elevationMarkers.push(marker);
+  elevationClicks.push(clickedLocation);
 
-  // Once two points are clicked, stop listening and query elevation
+  console.log("Point clicked:", clickedLocation);
+
+  // If two points have been clicked, compare their elevations
   if (elevationClicks.length === 2) {
-    map.off("click", handleElevationClickSimple); // Stop listening for clicks
+    console.log("Two points selected. Starting elevation comparison...");
 
-    // Query elevation for the first point using static identify method
-    // Create the ImageService instance once
-var elevationService = L.esri.ImageService({
-  url: "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer"
-});
+    // Stop listening for more clicks
+    map.off("click", handleElevationClickSimple);
 
-// Inside your click handler, use elevationService.identify()
-elevationService.identify()
-  .geometry(elevationClicks[0])
-  .returnPixelValues(true)
-  .run(function(err1, result1) {
-    if (err1 || !result1.pixelValues || result1.pixelValues.length === 0) {
-      alert("Could not get elevation for first point.");
-      return;
-    }
+    // Get elevation for the first point
+    queryElevation(elevationClicks[0], function(error1, elevation1) {
+      if (error1) {
+        alert("Error getting elevation for first point: " + error1);
+        console.error("First elevation error:", error1);
+        return;
+      }
 
-    elevationService.identify()
-      .geometry(elevationClicks[1])
-      .returnPixelValues(true)
-      .run(function(err2, result2) {
-        if (err2 || !result2.pixelValues || result2.pixelValues.length === 0) {
-          alert("Could not get elevation for second point.");
+      // Get elevation for the second point
+      queryElevation(elevationClicks[1], function(error2, elevation2) {
+        if (error2) {
+          alert("Error getting elevation for second point: " + error2);
+          console.error("Second elevation error:", error2);
           return;
         }
 
-        var elev1 = result1.pixelValues[0].value;
-        var elev2 = result2.pixelValues[0].value;
-        var change = elev2 - elev1;
+        // Calculate the elevation change
+        const elevationChange = elevation2 - elevation1;
+        console.log("Elevation comparison complete");
+        console.log("Point 1:", elevation1, "ft");
+        console.log("Point 2:", elevation2, "ft");
+        console.log("Change:", elevationChange, "ft");
 
+        // Show the results to the user
         alert("Elevation Comparison (ft):\n" +
-              "Point 1: " + elev1.toFixed(2) + "\n" +
-              "Point 2: " + elev2.toFixed(2) + "\n" +
-              "Change: " + change.toFixed(2) + " ft");
+              "Point 1: " + elevation1.toFixed(2) + "\n" +
+              "Point 2: " + elevation2.toFixed(2) + "\n" +
+              "Change: " + elevationChange.toFixed(2) + " ft");
       });
-  });
+    });
   }
 }
 
-// Connect the elevation tool to the button
+// This connects the elevation tool to the button in your HTML
 document.getElementById("elevationToolBtn").addEventListener("click", startElevationTool);
