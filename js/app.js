@@ -40,7 +40,7 @@ let bufferLayer = null;
 let layersLoaded = 0;
 let schoolLayerGroup = L.layerGroup();
 let hospitalsLayer;
-
+let parcelLayer = L.layerGroup().addTo(map);
 
 
 
@@ -173,6 +173,7 @@ function checkAllLayersLoaded() {
       "Elevation (LiDAR DEM)": demLayer,
       "Schools": schoolLayerGroup,
       "Hospitals": hospitalsLayer,
+      "Parcels (Buffer Results)": parcelLayer,
       
     };
 
@@ -206,18 +207,20 @@ function isCloseEnough(clickLatLng, layerLatLng, thresholdMeters = 20) {
 
 
 
-//////BUFFER//////////////////////////////////////////////////////////////////
-// Listen for when the user clicks the "Buffer Dam" button
+//////BUFFER TOOL WITH PARCEL QUERY (Esri Leaflet)///////////////////////////
+
+// Global layers for cleanup
+window.bufferLayer = null;
+window.parcelLayer = null;
+
+// Listen for "Buffer Dam" button click
 document.getElementById("bufferToolBtn").addEventListener("click", () => {
-
-  // Once the user clicks on the map, run this function once
+  // Wait for user to click on the map
   map.once("click", (e) => {
-    let clickedFeature = null; // We'll store the clicked dam here
+    let clickedFeature = null;
 
-    // Loop through each dam feature in the layer
+    // Check if user clicked near a dam
     damsLayer.eachLayer((layer) => {
-      // Check if the clicked map location matches a dam location
-      // (This uses exact coordinates; you can later improve with proximity detection)
       if (isCloseEnough(e.latlng, layer.getLatLng())) {
         clickedFeature = layer;
       }
@@ -225,36 +228,54 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
 
     // If a dam was clicked...
     if (clickedFeature) {
-      // Read the buffer distance the user entered in the input box (e.g., 5 or 10 km)
-      const selectedDistance = parseFloat(document.getElementById("bufferDistance").value);
+      const distance = parseFloat(document.getElementById("bufferDistance").value);
 
-      // Validate the input: make sure it's a number between 1 and 20 km
-      if (!isNaN(selectedDistance) && selectedDistance > 0 && selectedDistance <= 20) {
-        // Convert the clicked dam to a GeoJSON object (needed for Turf.js)
+      // Validate buffer distance
+      if (!isNaN(distance) && distance > 0 && distance <= 20) {
         const damGeoJSON = clickedFeature.toGeoJSON();
 
-        // Generate a buffer polygon around the dam using Turf.js
-        const buffer = turf.buffer(damGeoJSON, selectedDistance, { units: "kilometers" });
+        // Create buffer polygon using Turf.js
+        const buffer = turf.buffer(damGeoJSON, distance, { units: "kilometers" });
 
-        // Remove any previous buffer before adding the new one
-        if (bufferLayer) {
-          map.removeLayer(bufferLayer);
-        }
+        // Remove previous buffer and parcels
+        if (window.bufferLayer) map.removeLayer(window.bufferLayer);
+        if (window.parcelLayer) map.removeLayer(window.parcelLayer);
 
-        // Add the new buffer and store it in bufferLayer for future cleanup
-        bufferLayer = L.geoJSON(buffer, {
+        // Add buffer to map
+        window.bufferLayer = L.geoJSON(buffer, {
           style: { color: "#ffa500", weight: 2, fillOpacity: 0.4 }
         }).addTo(map);
 
-      } else {
+        // Query parcels that intersect the buffer
+        L.esri.query({
+          url: "https://dnrmaps.wi.gov/arcgis/rest/services/OP_Land_Records/OP_Parcels_Public_FS/FeatureServer/0"
+        })
+          .intersects(buffer)
+          .run((err, featureCollection) => {
+            if (err) {
+              console.error("Parcel query error:", err);
+              return;
+            }
 
-        // Warn the user if they entered an invalid distance
-        alert("Please enter a buffer distance between 1 and 20 km.");
+            // Add parcels to map
+            window.parcelLayer = L.geoJSON(featureCollection, {
+              style: { color: "#008000", weight: 1, fillOpacity: 0.2 },
+              onEachFeature: function (feature, layer) {
+                const props = feature.properties;
+                layer.bindPopup(`Parcel ID: ${props.PARCELID || "N/A"}`);
+              }
+            }).addTo(map);
+
+            // Optional: log how many parcels were found
+            console.log("Parcels found:", featureCollection.features.length);
+          });
+
+      } else {
+        alert("Enter a buffer distance between 1 and 20 km.");
       }
 
     } else {
-      // If no dam was clicked (e.g., clicked empty space), show a message
-      alert("Please click directly on a dam.");
+      alert("Click directly on a dam.");
     }
   });
 });
