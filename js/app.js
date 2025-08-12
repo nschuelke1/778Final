@@ -248,27 +248,25 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
 
         // Query parcels that intersect the buffer
         L.esri.query({
-          url: "https://dnrmaps.wi.gov/arcgis/rest/services/OP_Land_Records/OP_Parcels_Public_FS/FeatureServer/0"
+          url: "https://services3.arcgis.com/n6uYoouQZW75n5WI/arcgis/rest/services/Wisconsin_Statewide_Parcels/FeatureServer/0"
         })
-          .intersects(buffer)
-          .run((err, featureCollection) => {
-            if (err) {
-              console.error("Parcel query error:", err);
-              return;
+        .intersects(buffer)
+        .run((err, featureCollection) => {
+          if (err) {
+            console.error("Parcel query error:", err);
+            return;
+          }
+
+          parcelLayer = L.geoJSON(featureCollection, {
+            style: { color: "#008000", weight: 1, fillOpacity: 0.2 },
+            onEachFeature: function (feature, layer) {
+              const props = feature.properties;
+              layer.bindPopup(`Parcel ID: ${props.PARCELID || "N/A"}`);
             }
+          }).addTo(map);
 
-            // Add parcels to map
-            window.parcelLayer = L.geoJSON(featureCollection, {
-              style: { color: "#008000", weight: 1, fillOpacity: 0.2 },
-              onEachFeature: function (feature, layer) {
-                const props = feature.properties;
-                layer.bindPopup(`Parcel ID: ${props.PARCELID || "N/A"}`);
-              }
-            }).addTo(map);
-
-            // Optional: log how many parcels were found
-            console.log("Parcels found:", featureCollection.features.length);
-          });
+          console.log("Parcels found:", featureCollection.features.length);
+        });
 
       } else {
         alert("Enter a buffer distance between 1 and 20 km.");
