@@ -2,7 +2,7 @@
   "name": "gis-buffer-app",
   "version": "1.0.0",
   "description": "GIS buffer and parcel summary app",
-  "main": "server.js",
+  "main": "js/server.js",
   "scripts": {
     "start": "node server.js"
   },
