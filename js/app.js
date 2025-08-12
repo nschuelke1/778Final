@@ -207,15 +207,14 @@ function isCloseEnough(clickLatLng, layerLatLng, thresholdMeters = 20) {
 
 
 
-//////BUFFER TOOL WITH PARCEL QUERY (Esri Leaflet)///////////////////////////
+//////BUFFER TOOL WITH PARCEL QUERY///////////////////////////
 
-// Global layers for cleanup
+// Global layer for cleanup
 window.bufferLayer = null;
-window.parcelLayer = null;
+
 
 // Listen for "Buffer Dam" button click
 document.getElementById("bufferToolBtn").addEventListener("click", () => {
-  // Wait for user to click on the map
   map.once("click", (e) => {
     let clickedFeature = null;
 
@@ -226,11 +225,9 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
       }
     });
 
-    // If a dam was clicked...
     if (clickedFeature) {
       const distance = parseFloat(document.getElementById("bufferDistance").value);
 
-      // Validate buffer distance
       if (!isNaN(distance) && distance > 0 && distance <= 20) {
         const damGeoJSON = clickedFeature.toGeoJSON();
 
@@ -238,11 +235,11 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
         const buffer = turf.buffer(damGeoJSON, distance, { units: "kilometers" });
 
         // Remove previous buffer and parcels
-        if (window.bufferLayer) map.removeLayer(window.bufferLayer);
-        if (window.parcelLayer) map.removeLayer(window.parcelLayer);
+        if (bufferLayer) map.removeLayer(bufferLayer);
+        if (parcelLayer) map.removeLayer(parcelLayer);
 
         // Add buffer to map
-        window.bufferLayer = L.geoJSON(buffer, {
+        bufferLayer = L.geoJSON(buffer, {
           style: { color: "#ffa500", weight: 2, fillOpacity: 0.4 }
         }).addTo(map);
 
