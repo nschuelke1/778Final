@@ -329,6 +329,12 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
 
           console.log("Parcels found:", featureCollection.features.length);
 
+          // Log GISACRES values for debugging
+          featureCollection.features.forEach((feature) => {
+            const props = feature.properties;
+            console.log("GISACRES raw value:", props.GISACRES);
+          });
+
           // Display summary table
           displayParcelSummary(featureCollection.features);
         });
@@ -345,7 +351,7 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
 
 
 
-displayParcelSummary(parcelGeoJSON.features);
+
 
 ////// ELEVATION TOOL //////////////////////////////////////////////////
 
