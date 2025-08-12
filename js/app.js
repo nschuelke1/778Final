@@ -41,6 +41,8 @@ let layersLoaded = 0;
 let schoolLayerGroup = L.layerGroup();
 let hospitalsLayer;
 let parcelLayer = L.layerGroup().addTo(map);
+let elevationPoints = [];
+let elevationMarkers = [];
 
 
 
@@ -274,3 +276,88 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
     }
   });
 });
+
+
+
+//////ELEVATION TOOL//////////////////////////////////////////////////
+
+// Lets user click two points and compares elevation
+// Starts the elevation tool when the button is clicked
+function startElevationTool() {
+  // Clear previous clicks and markers
+  elevationClicks = [];
+  elevationMarkers.forEach(function(marker) {
+    map.removeLayer(marker); // Remove old markers from the map
+  });
+  elevationMarkers = [];
+
+  // Tells user to click two points
+  alert("Click two points on the map to compare elevation.");
+
+  // Listen for map clicks
+  map.on("click", handleElevationClickSimple);
+}
+
+// Handles each map click
+function handleElevationClickSimple(e) {
+  var latlng = e.latlng; // Get the clicked location
+
+  // Add a blue marker where the user clicked
+  var marker = L.circleMarker(latlng, {
+    radius: 6,
+    color: "blue",
+    fillColor: "blue",
+    fillOpacity: 0.6
+  }).addTo(map);
+  elevationMarkers.push(marker); // Store the marker
+
+  elevationClicks.push(latlng); // Store the clicked location
+
+  // Once two points are clicked, query elevation
+  if (elevationClicks.length === 2) {
+    map.off("click", handleElevationClickSimple); // Stop listening for clicks
+
+    // Set up the elevation image service
+    var service = L.esri.imageService({
+      url: "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer"
+    });
+
+    // Query elevation for the first point
+    service.identify()
+      .geometry(elevationClicks[0]) // First clicked location
+      .returnPixelValues(true)      // Request elevation value
+      .run(function(err1, result1) {
+        if (err1 || !result1.pixelValues || result1.pixelValues.length === 0) {
+          alert("Could not get elevation for first point.");
+          return;
+        }
+
+        // Query elevation for the second point
+        service.identify()
+          .geometry(elevationClicks[1]) // Second clicked location
+          .returnPixelValues(true)      // Request elevation value
+          .run(function(err2, result2) {
+            if (err2 || !result2.pixelValues || result2.pixelValues.length === 0) {
+              alert("Could not get elevation for second point.");
+              return;
+            }
+
+            // Extract elevation values
+            var elev1 = result1.pixelValues[0].value;
+            var elev2 = result2.pixelValues[0].value;
+
+            // Calculate elevation change
+            var change = elev2 - elev1;
+
+            // Show results in an alert
+            alert("Elevation Comparison (ft):\n" +
+                  "Point 1: " + elev1.toFixed(2) + "\n" +
+                  "Point 2: " + elev2.toFixed(2) + "\n" +
+                  "Change: " + change.toFixed(2) + " ft");
+          }); // End of second elevation query
+      }); // End of first elevation query
+  } // End of if block for two clicks
+} // End of handleElevationClickSimple function
+
+// Connect the elevation tool to the button
+document.getElementById("elevationToolBtn").addEventListener("click", startElevationTool);
