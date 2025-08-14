@@ -102,6 +102,7 @@ function loadGeoJSON(url, styleOptions, callback) {
 loadGeoJSON("data/Lakes_Large_Rivers.geojson", { color: "#0077b6", weight: 2 }, function (layer) {
   riversLayer = layer;
   checkAllLayersLoaded();
+  console.log("Layers loaded:", layersLoaded);
 });
 
 // Load Watersheds
