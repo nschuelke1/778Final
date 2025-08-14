@@ -168,6 +168,7 @@ const demLayer = L.esri.imageMapLayer({
   attribution: "WI DNR LiDAR DEM"
 });
 
+checkAllLayersLoaded(); 
 
 
 
