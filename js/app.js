@@ -376,8 +376,12 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
 
         const pixelValue = result.value;
         if (pixelValue !== null && pixelValue !== "NoData") {
-          alert(`Elevation: ${parseFloat(pixelValue).toFixed(2)} ft`);
+           L.popup()
+            .setLatLng(e.latlng)
+            .setContent(`Elevation: ${parseFloat(pixelValue).toFixed(2)} ft`)
+            .openOn(map);
         } else {
+
           alert("No elevation data found at this location.");
         }
       });
