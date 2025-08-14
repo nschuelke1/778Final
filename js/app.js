@@ -355,31 +355,24 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
 
 ////// ELEVATION TOOL //////////////////////////////////////////////////
 
-document.getElementById("elevationToolBtn").addEventListener("click", () => {
-  alert("Click a point to get elevation.");
+L.esri.identifyImage()
+  .url("https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer")
+  .on(map)
+  .at(e.latlng)
+  .run((error, result) => {
+    if (error) {
+      console.error("Elevation query error:", error);
+      alert("Error getting elevation.");
+      return;
+    }
 
-  map.once("click", function (e) {
-    L.esri.identifyImage({
-      url: "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer"
-    })
-      .on(map)
-      .at(e.latlng)
-      .run((error, result) => {
-        if (error) {
-          console.error("Elevation query error:", error);
-          alert("Error getting elevation.");
-          return;
-        }
-
-        const pixelValue = result.value;
-        if (pixelValue !== null && pixelValue !== "NoData") {
-          L.popup()
-            .setLatLng(e.latlng)
-            .setContent(`Elevation: ${parseFloat(pixelValue).toFixed(2)} ft`)
-            .openOn(map);
-        } else {
-          alert("No elevation data found at this location.");
-        }
-      });
+    const pixelValue = result.value;
+    if (pixelValue !== null && pixelValue !== "NoData") {
+      L.popup()
+        .setLatLng(e.latlng)
+        .setContent(`Elevation: ${parseFloat(pixelValue).toFixed(2)} ft`)
+        .openOn(map);
+    } else {
+      alert("No elevation data found at this location.");
+    }
   });
-});
