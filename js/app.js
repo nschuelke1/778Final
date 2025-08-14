@@ -356,7 +356,7 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
 
 ////// ELEVATION TOOL //////////////////////////////////////////////////
 document.addEventListener("DOMContentLoaded", () => {
-  const elevationUrl = "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer";
+  const elevationUrl = "https://elevation.arcgis.com/arcgis/rest/services/WorldElevation/Terrain/ImageServer"";
 
   // Add click listener for elevation tool
   document.getElementById("elevationToolBtn").addEventListener("click", () => {
