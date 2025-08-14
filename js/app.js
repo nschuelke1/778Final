@@ -148,7 +148,7 @@ loadGeoJSON("data/WisconsinHospitals.geojson", {
   radius: 2,             
   fillOpacity: 0.7,
   onEachFeature: function (feature, layer) {
-    layer.bindPopup(`${name}`);
+    layer.bindPopup(`${feature.properties.name || "Hospital"}`);
   }
 }, function (layer) {
   // Add to global hospitalsLayer so it appears in overlay controls
@@ -359,14 +359,11 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
   alert("Click a point to get elevation.");
 
   map.once("click", function (e) {
-    const demLayer = L.esri.imageMapLayer({
+    L.esri.identifyImage({
       url: "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer"
-    });
-
-    L.esri.identifyImage()
+    })
       .on(map)
       .at(e.latlng)
-      .layers("all")
       .run((error, result) => {
         if (error) {
           console.error("Elevation query error:", error);
@@ -376,12 +373,11 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
 
         const pixelValue = result.value;
         if (pixelValue !== null && pixelValue !== "NoData") {
-           L.popup()
+          L.popup()
             .setLatLng(e.latlng)
             .setContent(`Elevation: ${parseFloat(pixelValue).toFixed(2)} ft`)
             .openOn(map);
         } else {
-
           alert("No elevation data found at this location.");
         }
       });
