@@ -30,6 +30,7 @@ function getRadius(zoom) {
 
 
 
+console.log("Raster plugin available:", typeof L.esri.identifyImage);
 
 /////////////////////////////////////////////////////////////////////////////
 // Declare layer variables
@@ -354,25 +355,35 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
 
 
 ////// ELEVATION TOOL //////////////////////////////////////////////////
+document.addEventListener("DOMContentLoaded", () => {
+  const elevationUrl = "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer";
 
-L.esri.identifyImage()
-  .url("https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer")
-  .on(map)
-  .at(e.latlng)
-  .run((error, result) => {
-    if (error) {
-      console.error("Elevation query error:", error);
-      alert("Error getting elevation.");
-      return;
-    }
+  // Add click listener for elevation tool
+  document.getElementById("elevationToolBtn").addEventListener("click", () => {
+    map.once("click", (e) => {
+      L.esri.identifyImage({
+        url: elevationUrl
+      })
+        .at(e.latlng)
+        .run((error, result) => {
+          if (error) {
+            console.error("Elevation query error:", error);
+            alert("Error getting elevation.");
+            return;
+          }
 
-    const pixelValue = result.value;
-    if (pixelValue !== null && pixelValue !== "NoData") {
-      L.popup()
-        .setLatLng(e.latlng)
-        .setContent(`Elevation: ${parseFloat(pixelValue).toFixed(2)} ft`)
-        .openOn(map);
-    } else {
-      alert("No elevation data found at this location.");
-    }
+          const pixelValue = result.value;
+          if (pixelValue !== null && pixelValue !== "NoData") {
+            L.popup()
+              .setLatLng(e.latlng)
+              .setContent(`Elevation: ${parseFloat(pixelValue).toFixed(2)} ft`)
+              .openOn(map);
+          } else {
+            alert("No elevation data found at this location.");
+          }
+        });
+    });
+
+    alert("Click on the map to get elevation.");
   });
+});
