@@ -4,6 +4,9 @@
 
 
 
+// Esri API Key for elevation service
+const esriApiKey = "AAPTxy8BH1VEsoebNVZXo8HurA_2jA8sPPf_DuV7jRLl5PwtnXSU0EiBd11SD4M-Bxw0hCcLfTFwvO8qMU69LnIuTXBc20px1QrO2YvAWh7qW4shtxgRBGkvOKbSUxG1UlsSq_rjYNW_BU84JuypUijxgbvAm3J6aFLqyZGnWiBq7w9CtuCohALUyjkCrONoQ-r1P_V8vvLTifb8V0eWMt4rGV0IiA4QE-WtX_zxA8uL3jaikZCbKD6Gd0xtXh9N9zn6AT1_agURHDlj"; 
+
 
 //////Initialize the map and Base Layers/////////////////////////////////////
 var map = L.map("map").setView([43.0, -89.5], 7); // Centered over Wisconsin
@@ -210,6 +213,9 @@ function isCloseEnough(clickLatLng, layerLatLng, thresholdMeters = 20) {
 
 
 
+
+
+
 // Clear Results Button Logic
 document.addEventListener("DOMContentLoaded", () => {
   const clearBtn = document.getElementById("clearResultsBtn");
@@ -355,35 +361,60 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
 
 
 ////// ELEVATION TOOL //////////////////////////////////////////////////
-document.addEventListener("DOMContentLoaded", () => {
-  const elevationUrl = "https://elevation.arcgis.com/arcgis/rest/services/WorldElevation/Terrain/ImageServer";
+document.getElementById("elevationToolBtn").addEventListener("click", () => {
+  let points = [];
 
-  // Add click listener for elevation tool
-  document.getElementById("elevationToolBtn").addEventListener("click", () => {
-    map.once("click", (e) => {
-      L.esri.identifyImage({
-        url: elevationUrl
-      })
-        .at(e.latlng)
-        .run((error, result) => {
-          if (error) {
-            console.error("Elevation query error:", error);
-            alert("Error getting elevation.");
-            return;
-          }
+  alert("Click two points on the map to compare elevation.");
 
-          const pixelValue = result.value;
-          if (pixelValue !== null && pixelValue !== "NoData") {
-            L.popup()
-              .setLatLng(e.latlng)
-              .setContent(`Elevation: ${parseFloat(pixelValue).toFixed(2)} ft`)
-              .openOn(map);
-          } else {
-            alert("No elevation data found at this location.");
-          }
-        });
+  const clickHandler = function (e) {
+    const latlng = e.latlng;
+
+    L.esri.identifyImage({
+      url: "https://elevation.arcgis.com/arcgis/rest/services/WorldElevation/Terrain/ImageServer",
+      apikey: esriApiKey
+    })
+    .at(latlng)
+    .run((error, result) => {
+      if (error) {
+        console.error("Elevation query error:", error);
+        alert("Error getting elevation.");
+        return;
+      }
+
+      const elevation = result.properties.Value;
+      points.push({ latlng, elevation });
+
+      // Mark the clicked point
+      const marker = L.circleMarker(latlng, {
+        radius: 6,
+        color: "#ff0000",
+        fillOpacity: 0.6
+      }).addTo(map);
+
+      marker.bindPopup(`Elevation: ${elevation.toFixed(2)} m`).openPopup();
+
+      // If two points are selected, compare
+      if (points.length === 2) {
+        const diff = points[1].elevation - points[0].elevation;
+        const distance = points[0].latlng.distanceTo(points[1].latlng) / 1000; // km
+        const slope = (diff / (distance * 1000)) * 100; // percent
+
+        L.popup()
+          .setLatLng(points[1].latlng)
+          .setContent(`
+            <strong>Elevation Comparison</strong><br>
+            Point 1: ${points[0].elevation.toFixed(2)} m<br>
+            Point 2: ${points[1].elevation.toFixed(2)} m<br>
+            Difference: ${diff.toFixed(2)} m<br>
+            Distance: ${distance.toFixed(2)} km<br>
+            Slope: ${slope.toFixed(2)}%
+          `)
+          .openOn(map);
+
+        map.off("click", clickHandler); // Stop listening
+      }
     });
+  };
 
-    alert("Click on the map to get elevation.");
-  });
+  map.on("click", clickHandler);
 });
