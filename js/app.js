@@ -161,14 +161,6 @@ loadGeoJSON("data/WisconsinHospitals.geojson", {
   checkAllLayersLoaded();
 });
 
-// Load Wisconsin DEM Layer REST
-const demLayer = L.esri.imageMapLayer({
-  url: "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer",
-  opacity: 0.9,
-  attribution: "WI DNR LiDAR DEM"
-});
-
-checkAllLayersLoaded(); 
 
 
 
@@ -179,7 +171,6 @@ function checkAllLayersLoaded() {
       "Lakes & Rivers": riversLayer,
       "Watersheds": watershedsLayer,
       "Dams": damsLayer,
-      "Elevation (LiDAR DEM)": demLayer,
       "Schools": schoolLayerGroup,
       "Hospitals": hospitalsLayer,
       "Parcels (Buffer Results)": parcelLayer,
@@ -368,26 +359,21 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
 
   alert("Click two points on the map to compare elevation.");
 
-  const clickHandler = function (e) {
-    const latlng = e.latlng;
+  const clickHandler = async function (e) {
+    const { lat, lng } = e.latlng;
 
-    L.esri.identifyImage({
-      url: "https://elevation.arcgis.com/arcgis/rest/services/WorldElevation/Terrain/ImageServer",
-      token: esriApiKey
-    })
-    .at(latlng)
-    .run((error, result) => {
-      if (error) {
-        console.error("Elevation query error:", error);
-        alert("Error getting elevation.");
-        return;
-      }
+    // USGS Elevation Point Query Service
+    const url = `https://nationalmap.gov/epqs/pqs.php?x=${lng}&y=${lat}&units=Meters&output=json`;
 
-      const elevation = result.properties.Value;
-      points.push({ latlng, elevation });
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      const elevation = data.USGS_Elevation_Point_Query_Service.Elevation_Query.Elevation;
+      points.push({ latlng: e.latlng, elevation });
 
       // Mark the clicked point
-      const marker = L.circleMarker(latlng, {
+      const marker = L.circleMarker(e.latlng, {
         radius: 6,
         color: "#ff0000",
         fillOpacity: 0.6
@@ -415,7 +401,10 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
 
         map.off("click", clickHandler); // Stop listening
       }
-    });
+    } catch (error) {
+      console.error("Elevation query error:", error);
+      alert("Error getting elevation.");
+    }
   };
 
   map.on("click", clickHandler);
