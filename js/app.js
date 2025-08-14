@@ -172,7 +172,7 @@ const demLayer = L.esri.imageMapLayer({
 
 function checkAllLayersLoaded() {
   layersLoaded++;
-  if (layersLoaded === 6) {
+  if (layersLoaded === 7) {
     const overlayMaps = {
       "Lakes & Rivers": riversLayer,
       "Watersheds": watershedsLayer,
