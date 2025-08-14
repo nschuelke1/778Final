@@ -356,7 +356,7 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
 
 ////// ELEVATION TOOL //////////////////////////////////////////////////
 document.addEventListener("DOMContentLoaded", () => {
-  const elevationUrl = "https://elevation.arcgis.com/arcgis/rest/services/WorldElevation/Terrain/ImageServer"";
+  const elevationUrl = "https://elevation.arcgis.com/arcgis/rest/services/WorldElevation/Terrain/ImageServer";
 
   // Add click listener for elevation tool
   document.getElementById("elevationToolBtn").addEventListener("click", () => {
