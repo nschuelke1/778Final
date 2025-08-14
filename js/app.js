@@ -373,7 +373,7 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
 
     L.esri.identifyImage({
       url: "https://elevation.arcgis.com/arcgis/rest/services/WorldElevation/Terrain/ImageServer",
-      apikey: esriApiKey
+      token: esriApiKey
     })
     .at(latlng)
     .run((error, result) => {
