@@ -303,7 +303,7 @@ function displayParcelSummary(features, schoolsInBuffer = 0, hospitalsInBuffer =
   `;
   tbody.appendChild(hospitalsRow);
 
-
+}
 
 
 //////BUFFER TOOL WITH PARCEL QUERY///////////////////////////
@@ -406,7 +406,7 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
 
 ////// ELEVATION TOOL //////////////////////////////////////////////////
 document.getElementById("elevationToolBtn").addEventListener("click", () => {
-  let points = [];
+  elevationPoints = [];
 
   alert("Click two points on the map to compare elevation.");
 
@@ -421,7 +421,7 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
       const result = await response.json();
 
       const elevation = result.results[0].elevation;
-      points.push({ latlng: e.latlng, elevation });
+      elevationPoints.push({ latlng: e.latlng, elevation });
 
       // Mark the clicked point
       const marker = L.circleMarker(e.latlng, {
@@ -435,22 +435,22 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
       marker.bindPopup(`Elevation: ${elevation.toFixed(2)} m`).openPopup();
 
       // If two points are selected, compare
-      if (points.length === 2) {
-        const diff = points[1].elevation - points[0].elevation;
-        const distance = points[0].latlng.distanceTo(points[1].latlng) / 1000; // km
+      if (elevationPoints.length === 2) {
+        const diff = elevationPoints[1].elevation - elevationPoints[0].elevation;
+        const distance = elevationPoints[0].latlng.distanceTo(elevationPoints[1].latlng) / 1000;
         const slope = (diff / (distance * 1000)) * 100; // percent
 
-        L.popup()
-          .setLatLng(points[1].latlng)
-          .setContent(`
-            <strong>Elevation Comparison</strong><br>
-            Point 1: ${points[0].elevation.toFixed(2)} m<br>
-            Point 2: ${points[1].elevation.toFixed(2)} m<br>
-            Difference: ${diff.toFixed(2)} m<br>
-            Distance: ${distance.toFixed(2)} km<br>
-            Slope: ${slope.toFixed(2)}%
-          `)
-          .openOn(map);
+       L.popup()
+        .setLatLng(elevationPoints[1].latlng)
+        .setContent(`
+          <strong>Elevation Comparison</strong><br>
+          Point 1: ${elevationPoints[0].elevation.toFixed(2)} m<br>
+          Point 2: ${elevationPoints[1].elevation.toFixed(2)} m<br>
+          Difference: ${diff.toFixed(2)} m<br>
+          Distance: ${distance.toFixed(2)} km<br>
+          Slope: ${slope.toFixed(2)}%
+        `)
+        .openOn(map);
 
         map.off("click", clickHandler); // Stop listening
       }
@@ -462,5 +462,5 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
 
   map.on("click", clickHandler);
 });
-}
+
 
