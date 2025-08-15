@@ -9,15 +9,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve static files from the project root
-app.use(express.static(path.join(__dirname, "..")));
-
-// Serve GeoJSON files from public/data
-app.use("/data", express.static(path.join(__dirname, "../public/data")));
+// Serve all static files from /public
+app.use(express.static(path.join(__dirname, "public")));
 
 // Fallback to index.html for client-side routing
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../index.html"));
+  res.sendFile(path.join(__dirname, "public/index.html"));
 });
 
 // Start the server
