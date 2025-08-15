@@ -166,7 +166,7 @@ loadGeoJSON("data/WisconsinHospitals.geojson", {
 
 function checkAllLayersLoaded() {
   layersLoaded++;
-  if (layersLoaded === 7) {
+  if (layersLoaded === 6) {
     const overlayMaps = {
       "Lakes & Rivers": riversLayer,
       "Watersheds": watershedsLayer,
