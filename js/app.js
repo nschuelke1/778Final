@@ -372,20 +372,15 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
   const clickHandler = async function (e) {
     const { lat, lng } = e.latlng;
 
-  // Use CORS proxy to bypass fetch block
-  const proxy = "https://api.allorigins.win/get?url=";
-  const url = `${proxy}${encodeURIComponent(`https://nationalmap.gov/epqs/pqs.php?x=${lng}&y=${lat}&units=Meters&output=json`)}`;
+    // ✅ Use Open-Elevation API (no proxy needed)
+    const url = `https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lng}`;
 
-  try {
-    const response = await fetch(url);
-    const result = await response.json();
+    try {
+      const response = await fetch(url);
+      const result = await response.json();
 
-    // ✅ Manually parse the JSON string inside `contents`
-    const data = JSON.parse(result.contents);
-
-    const elevation = data.USGS_Elevation_Point_Query_Service.Elevation_Query.Elevation;
-    points.push({ latlng: e.latlng, elevation });
-
+      const elevation = result.results[0].elevation;
+      points.push({ latlng: e.latlng, elevation });
 
       // Mark the clicked point
       const marker = L.circleMarker(e.latlng, {
