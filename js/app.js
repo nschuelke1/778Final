@@ -191,7 +191,7 @@ const demLayer = L.esri.imageMapLayer({
   url: "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer",
   opacity: 0.9,
   attribution: "WI DNR LiDAR DEM"
-});
+}).addTo(map);
 demLayer.on("load", () => {
   checkAllLayersLoaded();
 });
@@ -203,8 +203,7 @@ function checkAllLayersLoaded() {
   console.log(`Layers loaded: ${layersLoaded}`);
 
   if (layersLoaded === 7) {
-    // Make sure school layers are visible
-    schoolLayerGroup.addTo(map);
+    schoolLayerGroup.addTo(map); // ✅ Make sure this is here
 
     const overlayMaps = {
       "Lakes & Rivers": riversLayer,
