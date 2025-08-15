@@ -72,7 +72,7 @@ riversLayer = addGeoJSONLayer("data/Lakes_Large_Rivers.geojson", {
 });
 
 ///// Watersheds /////
-watershedsLayer = addGeoJSONLayer("data/Wisconsin_Watersheds.geojson", {
+watershedsLayer = addGeoJSONLayer("data/Watersheds.geojson", {
   style: {
     color: "#8e44ad",
     weight: 1,
@@ -132,7 +132,7 @@ privateSchoolsLayer = addGeoJSONLayer("data/PrivateSchools.geojson", {
 });
 
 ///// Hospitals /////
-hospitalsLayer = addGeoJSONLayer("data/Wisconsin_Hospitals.geojson", {
+hospitalsLayer = addGeoJSONLayer("data/WisconsinHospitals.geojson", {
   pointToLayer: (feature, latlng) => {
     return L.circleMarker(latlng, {
       radius: 6,
