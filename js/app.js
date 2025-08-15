@@ -168,7 +168,7 @@ const demLayer = L.esri.imageMapLayer({
 demLayer.on("load", () => {
   checkAllLayersLoaded();
 });
-checkAllLayersLoaded();
+
 
 /////////////////////////////////////////////////////////////////////////////
 // Function to check if all layers are loaded
