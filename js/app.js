@@ -50,13 +50,13 @@ let parcelGeoJSON;
 let layersLoaded = 0;
 
 /////////////////////////////////////////////////////////////////////////////
-// Popup generator for all layers (multi-source name support)
+// Popup generator 
 function makePopup(properties) {
   const name =
-    properties.SCHOOL ||
-    properties.FACILITY_NAME ||
-    properties.WSHED_NAME ||
-    properties.OFFICIAL_NAME;
+    properties.SCHOOL ||               // Public Schools
+    properties.FACILITY_NAME ||        // Hospitals
+    properties.WSHED_NAME ||           // Watersheds
+    properties.OFFICIAL_NAME;          // Rivers
 
   if (name) {
     return `<strong>${name}</strong>`;
