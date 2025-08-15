@@ -96,13 +96,13 @@ function loadGeoJSON(url, styleOptions, callback) {
 // Load each layer and check when done
 
 // Lakes & Large Rivers
-loadGeoJSON("data/Lakes_Large_Rivers.geojson", { color: "#0077b6", weight: 2 }, function (layer) {
+loadGeoJSON("/data/Lakes_Large_Rivers.geojson", { color: "#0077b6", weight: 2 }, function (layer) {
   riversLayer = layer;
   checkAllLayersLoaded();
 });
 
 // Watersheds
-loadGeoJSON("data/Watersheds.geojson", {
+loadGeoJSON("/data/Watersheds.geojson", {
   color: "#34a853",
   weight: 1,
   fillOpacity: 0.2
@@ -112,7 +112,7 @@ loadGeoJSON("data/Watersheds.geojson", {
 });
 
 // Dams
-loadGeoJSON("data/Wisconsin_Dams.geojson", {
+loadGeoJSON("/data/Wisconsin_Dams.geojson", {
   color: "#d22e2e",
   weight: 1,
   fillOpacity: 0.8
@@ -123,7 +123,7 @@ loadGeoJSON("data/Wisconsin_Dams.geojson", {
 });
 
 // Public Schools
-loadGeoJSON("data/PublicSchools.geojson", {
+loadGeoJSON("/data/PublicSchools.geojson", {
   color: "#1e90ff",
   radius: 2,
   fillOpacity: 0.7,
@@ -137,7 +137,7 @@ loadGeoJSON("data/PublicSchools.geojson", {
 });
 
 // Private Schools
-loadGeoJSON("data/PrivateSchools.geojson", {
+loadGeoJSON("/data/PrivateSchools.geojson", {
   color: "#1e90ff",
   radius: 2,
   fillOpacity: 0.7,
@@ -151,7 +151,7 @@ loadGeoJSON("data/PrivateSchools.geojson", {
 });
 
 // Hospitals
-loadGeoJSON("data/WisconsinHospitals.geojson", {
+loadGeoJSON("/data/WisconsinHospitals.geojson", {
   color: "#ffa500",
   radius: 2,
   fillOpacity: 0.7
@@ -174,7 +174,12 @@ demLayer.on("load", () => {
 // Function to check if all layers are loaded
 function checkAllLayersLoaded() {
   layersLoaded++;
-  if (layersLoaded === 8) {
+  console.log(`Layers loaded: ${layersLoaded}`); // Optional debug log
+
+  if (layersLoaded === 7) {
+    // Make sure school layer group is visible
+    schoolLayerGroup.addTo(map);
+
     const overlayMaps = {
       "Lakes & Rivers": riversLayer,
       "Watersheds": watershedsLayer,
@@ -183,15 +188,15 @@ function checkAllLayersLoaded() {
       "Hospitals": hospitalsLayer,
       "Parcels (Buffer Results)": parcelLayer,
       "Elevation (LiDAR DEM)": demLayer,
-      
     };
 
     const baseMaps = {
-  "OpenStreetMap": osmBase,
-  "Satellite": satelliteBase
-};
+      "OpenStreetMap": osmBase,
+      "Satellite": satelliteBase
+    };
 
-L.control.layers(baseMaps, overlayMaps, { collapsed: false }).addTo(map);
+    L.control.layers(baseMaps, overlayMaps, { collapsed: false }).addTo(map);
+    console.log("Layer control added.");
   }
 }
 
