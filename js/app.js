@@ -164,9 +164,13 @@ const demLayer = L.esri.imageMapLayer({
   opacity: 0.9,
   attribution: "WI DNR LiDAR DEM"
 });
-
+demLayer.on("load", () => {
+  checkAllLayersLoaded();
+});
 checkAllLayersLoaded();
 
+/////////////////////////////////////////////////////////////////////////////
+// Function to check if all layers are loaded
 function checkAllLayersLoaded() {
   layersLoaded++;
   if (layersLoaded === 7) {
