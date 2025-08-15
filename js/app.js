@@ -48,6 +48,7 @@ let elevationPoints = [];
 let elevationMarkers = [];
 let parcelGeoJSON;
 let layersLoaded = 0;
+let layerControlAdded = false;
 
 /////////////////////////////////////////////////////////////////////////////
 // Popup generator 
@@ -212,7 +213,9 @@ function checkAllLayersLoaded() {
   layersLoaded++;
   console.log(`Layers loaded: ${layersLoaded}`);
 
-  if (layersLoaded === 7) {
+  if (layersLoaded >= 6 && !layerControlAdded) {
+    layerControlAdded = true; 
+
     const overlayMaps = {
       "Lakes & Rivers": riversLayer,
       "Watersheds": watershedsLayer,
@@ -348,8 +351,9 @@ function displayParcelSummary(features, schoolsInBuffer = 0, hospitalsInBuffer =
   tbody.appendChild(hospitalsRow);
 
 
-//////BUFFER TOOL WITH PARCEL QUERY///////////////////////////
 
+
+//////BUFFER TOOL WITH PARCEL QUERY///////////////////////////
 // Global layer for cleanup
 window.bufferLayer = null;
 
