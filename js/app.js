@@ -69,7 +69,7 @@ function makePopup(properties) {
 /////////////////////////////////////////////////////////////////////////////
 // Load each layer and check when done
 
-// Lakes & Large Rivers
+///// Lakes & Large Rivers
 fetch("/data/Lakes_Large_Rivers.geojson")
   .then(res => res.json())
   .then(data => {
@@ -80,11 +80,11 @@ fetch("/data/Lakes_Large_Rivers.geojson")
           layer.bindPopup(`<strong>River:</strong> ${feature.properties.OFFICIAL_NAME}`);
         }
       }
-    }).addTo(map);
+    })
     checkAllLayersLoaded();
   });
 
-// Watersheds
+///// Watersheds
 fetch("/data/Watersheds.geojson")
   .then(res => res.json())
   .then(data => {
@@ -95,11 +95,11 @@ fetch("/data/Watersheds.geojson")
           layer.bindPopup(`<strong>Watershed:</strong> ${feature.properties.WSHED_NAME}`);
         }
       }
-    }).addTo(map);
+    })
     checkAllLayersLoaded();
   });
 
-// Dams
+///// Dams
 fetch("/data/Wisconsin_Dams.geojson")
   .then(res => res.json())
   .then(data => {
@@ -113,11 +113,11 @@ fetch("/data/Wisconsin_Dams.geojson")
           weight: 1
         });
       }
-    }).addTo(map);
+    })
     checkAllLayersLoaded();
   });
 
-// Public Schools
+///// Public Schools
 fetch("/data/PublicSchools.geojson")
   .then(res => res.json())
   .then(data => {
@@ -141,7 +141,7 @@ fetch("/data/PublicSchools.geojson")
     checkAllLayersLoaded();
   });
 
-// Private Schools
+///// Private Schools
 fetch("/data/PrivateSchools.geojson")
   .then(res => res.json())
   .then(data => {
@@ -165,7 +165,7 @@ fetch("/data/PrivateSchools.geojson")
     checkAllLayersLoaded();
   });
 
-// Hospitals
+///// Hospitals
 fetch("/data/WisconsinHospitals.geojson")
   .then(res => res.json())
   .then(data => {
@@ -183,15 +183,17 @@ fetch("/data/WisconsinHospitals.geojson")
           layer.bindPopup(`<strong>Hospital:</strong> ${feature.properties.FACILITY_NAME}`);
         }
       }
-    }).addTo(map);
+    })
     checkAllLayersLoaded();
   });
 
+
+///// LiDAR DEM
 const demLayer = L.esri.imageMapLayer({
   url: "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer",
   opacity: 0.9,
   attribution: "WI DNR LiDAR DEM"
-}).addTo(map);
+})
 demLayer.on("load", () => {
   checkAllLayersLoaded();
 });
@@ -203,8 +205,6 @@ function checkAllLayersLoaded() {
   console.log(`Layers loaded: ${layersLoaded}`);
 
   if (layersLoaded === 7) {
-    schoolLayerGroup.addTo(map); // ✅ Make sure this is here
-
     const overlayMaps = {
       "Lakes & Rivers": riversLayer,
       "Watersheds": watershedsLayer,
@@ -224,7 +224,6 @@ function checkAllLayersLoaded() {
     console.log("Layer control added.");
   }
 }
-
 
 
 /////////////////////////////////////////////////////////////////////////////
