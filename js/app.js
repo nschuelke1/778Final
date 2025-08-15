@@ -65,100 +65,127 @@ function makePopup(properties) {
   return `<em>No name available</em>`;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// Function to load a GeoJSON file and apply styling and popup logic
-function loadGeoJSON(url, styleOptions, callback) {
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      const layer = L.geoJSON(data, {
-        pointToLayer: function (feature, latlng) {
-          return L.circleMarker(latlng, {
-            radius: getRadius(map.getZoom()),
-            color: styleOptions.color || "#000",
-            fillColor: styleOptions.fillColor || styleOptions.color || "#000",
-            fillOpacity: styleOptions.fillOpacity || 0.8,
-            weight: styleOptions.weight || 1
-          });
-        },
-        style: styleOptions,
-        onEachFeature: function (feature, layer) {
-          layer.bindPopup(makePopup(feature.properties));
-        }
-      });
-
-      if (callback) callback(layer);
-    })
-    .catch((error) => console.error("Error loading GeoJSON:", error));
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // Load each layer and check when done
 
 // Lakes & Large Rivers
-loadGeoJSON("/data/Lakes_Large_Rivers.geojson", { color: "#0077b6", weight: 2 }, function (layer) {
-  riversLayer = layer;
-  checkAllLayersLoaded();
-});
+fetch("/data/Lakes_Large_Rivers.geojson")
+  .then(res => res.json())
+  .then(data => {
+    riversLayer = L.geoJSON(data, {
+      style: { color: "#0077b6", weight: 2 },
+      onEachFeature: (feature, layer) => {
+        if (feature.properties.OFFICIAL_NAME) {
+          layer.bindPopup(`<strong>River:</strong> ${feature.properties.OFFICIAL_NAME}`);
+        }
+      }
+    }).addTo(map);
+    checkAllLayersLoaded();
+  });
 
 // Watersheds
-loadGeoJSON("/data/Watersheds.geojson", {
-  color: "#34a853",
-  weight: 1,
-  fillOpacity: 0.2
-}, function (layer) {
-  watershedsLayer = layer;
-  checkAllLayersLoaded();
-});
+fetch("/data/Watersheds.geojson")
+  .then(res => res.json())
+  .then(data => {
+    watershedsLayer = L.geoJSON(data, {
+      style: { color: "#34a853", weight: 1, fillOpacity: 0.2 },
+      onEachFeature: (feature, layer) => {
+        if (feature.properties.WSHED_NAME) {
+          layer.bindPopup(`<strong>Watershed:</strong> ${feature.properties.WSHED_NAME}`);
+        }
+      }
+    }).addTo(map);
+    checkAllLayersLoaded();
+  });
 
 // Dams
-loadGeoJSON("/data/Wisconsin_Dams.geojson", {
-  color: "#d22e2e",
-  weight: 1,
-  fillOpacity: 0.8
-}, function (layer) {
-  layer.eachLayer(l => l.unbindPopup()); // ← This removes all popups
-  damsLayer = layer;
-  checkAllLayersLoaded();
-});
+fetch("/data/Wisconsin_Dams.geojson")
+  .then(res => res.json())
+  .then(data => {
+    damsLayer = L.geoJSON(data, {
+      pointToLayer: (feature, latlng) => {
+        return L.circleMarker(latlng, {
+          radius: getRadius(map.getZoom()),
+          color: "#d22e2e",
+          fillColor: "#d22e2e",
+          fillOpacity: 0.8,
+          weight: 1
+        });
+      }
+    }).addTo(map);
+    checkAllLayersLoaded();
+  });
 
 // Public Schools
-loadGeoJSON("/data/PublicSchools.geojson", {
-  color: "#1e90ff",
-  radius: 2,
-  fillOpacity: 0.7,
-  onEachFeature: function (feature, layer) {
-    feature.properties.school_type = "Public";
-    layer.bindPopup(makePopup(feature.properties));
-  }
-}, function (layer) {
-  layer.eachLayer(l => schoolLayerGroup.addLayer(l));
-  checkAllLayersLoaded();
-});
+fetch("/data/PublicSchools.geojson")
+  .then(res => res.json())
+  .then(data => {
+    const publicSchools = L.geoJSON(data, {
+      pointToLayer: (feature, latlng) => {
+        return L.circleMarker(latlng, {
+          radius: 2,
+          color: "#1e90ff",
+          fillColor: "#1e90ff",
+          fillOpacity: 0.7
+        });
+      },
+      onEachFeature: (feature, layer) => {
+        if (feature.properties.SCHOOL) {
+          layer.bindPopup(`<strong>School:</strong> ${feature.properties.SCHOOL}`);
+        }
+      }
+    });
+
+    publicSchools.eachLayer(l => schoolLayerGroup.addLayer(l));
+    checkAllLayersLoaded();
+  });
 
 // Private Schools
-loadGeoJSON("/data/PrivateSchools.geojson", {
-  color: "#1e90ff",
-  radius: 2,
-  fillOpacity: 0.7,
-  onEachFeature: function (feature, layer) {
-    feature.properties.school_type = "Private";
-    layer.bindPopup(makePopup(feature.properties));
-  }
-}, function (layer) {
-  layer.eachLayer(l => schoolLayerGroup.addLayer(l));
-  checkAllLayersLoaded();
-});
+fetch("/data/PrivateSchools.geojson")
+  .then(res => res.json())
+  .then(data => {
+    const privateSchools = L.geoJSON(data, {
+      pointToLayer: (feature, latlng) => {
+        return L.circleMarker(latlng, {
+          radius: 2,
+          color: "#1e90ff",
+          fillColor: "#1e90ff",
+          fillOpacity: 0.7
+        });
+      },
+      onEachFeature: (feature, layer) => {
+        if (feature.properties.SCHOOL) {
+          layer.bindPopup(`<strong>School:</strong> ${feature.properties.SCHOOL}`);
+        }
+      }
+    });
+
+    privateSchools.eachLayer(l => schoolLayerGroup.addLayer(l));
+    checkAllLayersLoaded();
+  });
 
 // Hospitals
-loadGeoJSON("/data/WisconsinHospitals.geojson", {
-  color: "#ffa500",
-  radius: 2,
-  fillOpacity: 0.7
-}, function (layer) {
-  hospitalsLayer = layer;
-  checkAllLayersLoaded();
-});
+fetch("/data/WisconsinHospitals.geojson")
+  .then(res => res.json())
+  .then(data => {
+    hospitalsLayer = L.geoJSON(data, {
+      pointToLayer: (feature, latlng) => {
+        return L.circleMarker(latlng, {
+          radius: 2,
+          color: "#ffa500",
+          fillColor: "#ffa500",
+          fillOpacity: 0.7
+        });
+      },
+      onEachFeature: (feature, layer) => {
+        if (feature.properties.FACILITY_NAME) {
+          layer.bindPopup(`<strong>Hospital:</strong> ${feature.properties.FACILITY_NAME}`);
+        }
+      }
+    }).addTo(map);
+    checkAllLayersLoaded();
+  });
 
 const demLayer = L.esri.imageMapLayer({
   url: "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer",
@@ -171,13 +198,12 @@ demLayer.on("load", () => {
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Function to check if all layers are loaded
 function checkAllLayersLoaded() {
   layersLoaded++;
-  console.log(`Layers loaded: ${layersLoaded}`); // Optional debug log
+  console.log(`Layers loaded: ${layersLoaded}`);
 
   if (layersLoaded === 7) {
-    // Make sure school layer group is visible
+    // Make sure school layers are visible
     schoolLayerGroup.addTo(map);
 
     const overlayMaps = {
@@ -187,7 +213,7 @@ function checkAllLayersLoaded() {
       "Schools": schoolLayerGroup,
       "Hospitals": hospitalsLayer,
       "Parcels (Buffer Results)": parcelLayer,
-      "Elevation (LiDAR DEM)": demLayer,
+      "Elevation (LiDAR DEM)": demLayer
     };
 
     const baseMaps = {
@@ -199,7 +225,6 @@ function checkAllLayersLoaded() {
     console.log("Layer control added.");
   }
 }
-
 
 
 
