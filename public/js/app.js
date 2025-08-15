@@ -97,12 +97,13 @@ damsLayer = addGeoJSONLayer("data/Wisconsin_Dams.geojson", {
 publicSchoolsLayer = addGeoJSONLayer("data/PublicSchools.geojson", {
   pointToLayer: (feature, latlng) => {
     return L.circleMarker(latlng, {
-      radius: 2,
+      radius: 4,
       color: "#1e90ff",
       fillColor: "#1e90ff",
       fillOpacity: 0.7
     });
-  },
+  }, 
+
   onEachFeature: (feature, layer) => {
     if (feature.properties.SCHOOL) {
       layer.bindPopup(`<strong>Public School:</strong> ${feature.properties.SCHOOL}`);
@@ -116,12 +117,13 @@ publicSchoolsLayer = addGeoJSONLayer("data/PublicSchools.geojson", {
 privateSchoolsLayer = addGeoJSONLayer("data/PrivateSchools.geojson", {
   pointToLayer: (feature, latlng) => {
     return L.circleMarker(latlng, {
-      radius: 2,
-      color: "#ff7f50",
-      fillColor: "#ff7f50",
+      radius: 4,
+      color: "#1e90ff",
+      fillColor: "#1e90ff",
       fillOpacity: 0.7
     });
-  },
+  }, 
+  
   onEachFeature: (feature, layer) => {
     if (feature.properties.SCHOOL) {
       layer.bindPopup(`<strong>Private School:</strong> ${feature.properties.SCHOOL}`);
@@ -133,15 +135,15 @@ privateSchoolsLayer = addGeoJSONLayer("data/PrivateSchools.geojson", {
 
 ///// Hospitals /////
 hospitalsLayer = addGeoJSONLayer("data/WisconsinHospitals.geojson", {
-  pointToLayer: (feature, latlng) => {
-    return L.circleMarker(latlng, {
-      radius: 6,
-      color: "#2e86de",
-      fillColor: "#2e86de",
-      fillOpacity: 0.8,
-      weight: 1
-    });
-  }
+ pointToLayer: (feature, latlng) => {
+  return L.circleMarker(latlng, {
+    radius: 4,
+    color: "#ff0000",
+    fillColor: "#ff0000",
+    fillOpacity: 0.8,
+    weight: 1
+  });
+}
 });
 
 ///// LiDAR DEM /////
