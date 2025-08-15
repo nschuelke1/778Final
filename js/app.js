@@ -107,10 +107,23 @@ loadGeoJSON("data/Lakes_Large_Rivers.geojson", { color: "#0077b6", weight: 2 }, 
 });
 
 // Load Watersheds
-loadGeoJSON("data/Watersheds.geojson", { color: "#34a853", weight: 1, fillOpacity: 0.2 }, function (layer) {
-  watershedsLayer = layer;
-  checkAllLayersLoaded();
-});
+loadGeoJSON(
+  "data/Watersheds.geojson",
+  {
+    color: "#34a853",
+    weight: 1,
+    fillOpacity: 0.2
+  },
+  function (layer) {
+    watershedsLayer = layer;
+    checkAllLayersLoaded();
+  },
+  function onEachFeature(feature, layer) {
+    if (feature.properties && feature.properties.name) {
+      layer.bindPopup(`<strong>Watershed:</strong> ${feature.properties.name}`);
+    }
+  }
+);
 
 // Load Dams
 loadGeoJSON("data/Wisconsin_Dams.geojson", { color: "#d22e2e", weight: 1, fillOpacity: 0.8 }, function (layer) {
