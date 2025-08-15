@@ -393,7 +393,7 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
           });
 
           // Display summary table
-          displayParcelSummary(featureCollection.features);
+          displayParcelSummary(featureCollection.features, schoolsInBuffer, hospitalsInBuffer);
         });
 
       } else {
@@ -468,3 +468,4 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
 
   map.on("click", clickHandler);
 });
+}
