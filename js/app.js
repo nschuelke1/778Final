@@ -222,30 +222,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (clearBtn) {
     clearBtn.addEventListener("click", () => {
-      // Remove buffer layer if present
-      if (map.hasLayer(bufferLayer)) {
+      // Clear buffer layer
+      if (bufferLayer && map.hasLayer(bufferLayer)) {
         map.removeLayer(bufferLayer);
       }
+      bufferLayer = null;
 
       // Clear parcel layer group
-      if (map.hasLayer(parcelLayer)) {
+      if (parcelLayer && map.hasLayer(parcelLayer)) {
         map.removeLayer(parcelLayer);
       }
-
-      bufferLayer = null;
-      parcelLayer.clearLayers(); // Since it's a LayerGroup
+      parcelLayer.clearLayers();
 
       // Clear elevation markers
       elevationMarkers.forEach(marker => map.removeLayer(marker));
       elevationMarkers = [];
 
-      // Clear the results table
+      // Reset elevation points
+      points = [];
+
+      // Close any open popups
+      map.closePopup();
+
+      // Clear results table
       const resultsTableBody = document.querySelector("#resultsTable tbody");
       if (resultsTableBody) {
         resultsTableBody.innerHTML = "";
       }
 
-      console.log("Buffer, parcel, and elevation layers cleared. Table reset.");
+      console.log("All results cleared: buffer, parcels, elevation, and table.");
     });
   } else {
     console.warn("Clear Results button not found in DOM.");
