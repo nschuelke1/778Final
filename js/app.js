@@ -378,6 +378,12 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
 
   try {
     const response = await fetch(url);
+
+    const contentType = response.headers.get("content-type");
+    if (!response.ok || !contentType.includes("application/json")) {
+      throw new Error("Invalid response format or failed request.");
+    }
+
     const data = await response.json();
 
     const elevation = data.USGS_Elevation_Point_Query_Service.Elevation_Query.Elevation;
