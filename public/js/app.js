@@ -50,47 +50,38 @@ let parcelGeoJSON;
 let layersLoaded = 0;
 let layerControlAdded = false;
 
-/////////////////////////////////////////////////////////////////////////////
-// Popup generator 
-function makePopup(properties) {
-  const name =
-    properties.SCHOOL ||               // Public Schools
-    properties.FACILITY_NAME ||        // Hospitals
-    properties.WSHED_NAME ||           // Watersheds
-    properties.OFFICIAL_NAME;          // Rivers
 
-  if (name) {
-    return `<strong>${name}</strong>`;
-  }
 
-  return `<em>No name available</em>`;
+///// GeoJSON Loader /////
+function addGeoJSONLayer(url, options, callback) {
+  const layer = new L.GeoJSON.AJAX(url, options);
+  layer.on("data:loaded", () => {
+    if (callback) callback(layer);
+    checkAllLayersLoaded();
+  });
+  layer.addTo(map);
+  return layer;
 }
 
-
-/////////////////////////////////////////////////////////////////////////////
-// Load each layer and check when done
-
-///// Lakes & Large Rivers
-riversLayer = L.geoJSON("data/Wisconsin_Rivers.geojson", {
+///// Lakes & Large Rivers /////
+riversLayer = addGeoJSONLayer("data/Wisconsin_Rivers.geojson", {
   style: {
     color: "#3498db",
     weight: 2
   }
-}).addTo(map);
-checkAllLayersLoaded();
+});
 
 ///// Watersheds /////
-watershedsLayer = L.geoJSON("data/Wisconsin_Watersheds.geojson", {
+watershedsLayer = addGeoJSONLayer("data/Wisconsin_Watersheds.geojson", {
   style: {
     color: "#8e44ad",
     weight: 1,
     fillOpacity: 0.3
   }
-}).addTo(map);
-checkAllLayersLoaded();
+});
 
 ///// Dams /////
-damsLayer = L.geoJSON("data/Wisconsin_Dams.geojson", {
+damsLayer = addGeoJSONLayer("data/Wisconsin_Dams.geojson", {
   pointToLayer: (feature, latlng) => {
     return L.circleMarker(latlng, {
       radius: getRadius(map.getZoom()),
@@ -100,11 +91,10 @@ damsLayer = L.geoJSON("data/Wisconsin_Dams.geojson", {
       weight: 1
     });
   }
-}).addTo(map);
-checkAllLayersLoaded();
+});
 
 ///// Public Schools /////
-const publicSchoolsLayer = L.geoJSON("data/PublicSchools.geojson", {
+publicSchoolsLayer = addGeoJSONLayer("data/PublicSchools.geojson", {
   pointToLayer: (feature, latlng) => {
     return L.circleMarker(latlng, {
       radius: 2,
@@ -118,14 +108,12 @@ const publicSchoolsLayer = L.geoJSON("data/PublicSchools.geojson", {
       layer.bindPopup(`<strong>Public School:</strong> ${feature.properties.SCHOOL}`);
     }
   }
-}).addTo(map);
-
-publicSchoolsLayer.eachLayer(l => schoolLayerGroup.addLayer(l));
-checkAllLayersLoaded();
-
+}, layer => {
+  layer.eachLayer(l => schoolLayerGroup.addLayer(l));
+});
 
 ///// Private Schools /////
-const privateSchoolsLayer = L.geoJSON("data/PrivateSchools.geojson", {
+privateSchoolsLayer = addGeoJSONLayer("data/PrivateSchools.geojson", {
   pointToLayer: (feature, latlng) => {
     return L.circleMarker(latlng, {
       radius: 2,
@@ -139,14 +127,12 @@ const privateSchoolsLayer = L.geoJSON("data/PrivateSchools.geojson", {
       layer.bindPopup(`<strong>Private School:</strong> ${feature.properties.SCHOOL}`);
     }
   }
-}).addTo(map);
-
-privateSchoolsLayer.eachLayer(l => schoolLayerGroup.addLayer(l));
-checkAllLayersLoaded();
-
+}, layer => {
+  layer.eachLayer(l => schoolLayerGroup.addLayer(l));
+});
 
 ///// Hospitals /////
-hospitalsLayer = L.geoJSON("data/Wisconsin_Hospitals.geojson", {
+hospitalsLayer = addGeoJSONLayer("data/Wisconsin_Hospitals.geojson", {
   pointToLayer: (feature, latlng) => {
     return L.circleMarker(latlng, {
       radius: 6,
@@ -156,8 +142,7 @@ hospitalsLayer = L.geoJSON("data/Wisconsin_Hospitals.geojson", {
       weight: 1
     });
   }
-}).addTo(map);  
-checkAllLayersLoaded();
+});
 
 ///// LiDAR DEM /////
 const demLayer = L.esri.imageMapLayer({
@@ -168,7 +153,7 @@ const demLayer = L.esri.imageMapLayer({
 
 demLayer.on("load", () => {
   console.log("DEM layer loaded");
-  checkAllLayersLoaded(); 
+  checkAllLayersLoaded();
 });
 
 
