@@ -215,7 +215,7 @@ function isCloseEnough(clickLatLng, layerLatLng, thresholdMeters = 20) {
 
 
 
-
+/////////////////////////////////////////////////////////////////////////////
 // Clear Results Button Logic
 document.addEventListener("DOMContentLoaded", () => {
   const clearBtn = document.getElementById("clearResultsBtn");
@@ -267,7 +267,6 @@ function displayParcelSummary(features, schoolsInBuffer = 0, hospitalsInBuffer =
 
   features.forEach((feature) => {
     const props = feature.properties;
-
     const value = parseFloat(props.ESTFMKVALUE);
     const acres = parseFloat(props.GISACRES);
 
@@ -278,37 +277,21 @@ function displayParcelSummary(features, schoolsInBuffer = 0, hospitalsInBuffer =
   const tbody = document.querySelector("#resultsTable tbody");
   tbody.innerHTML = ""; // Clear all rows
 
-  const row = document.createElement("tr");
-  tbody.innerHTML = ""; // Clear all rows
+  const rows = [
+    { label: "Total Market Value ($)", value: totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) },
+    { label: "Total Acres", value: totalAcres.toFixed(2) },
+    { label: "Schools in Buffer", value: schoolsInBuffer },
+    { label: "Hospitals in Buffer", value: hospitalsInBuffer }
+  ];
 
-  const valueRow = document.createElement("tr");
-  valueRow.innerHTML = `
-    <td><strong>Total Market Value</strong></td>
-    <td>${totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
-  `;
-  tbody.appendChild(valueRow);
-
-  const acresRow = document.createElement("tr");
-  acresRow.innerHTML = `
-    <td><strong>Total Acres</strong></td>
-    <td>${totalAcres.toFixed(2)}</td>
-  `;
-  tbody.appendChild(acresRow);
-
-  const schoolsRow = document.createElement("tr");
-  schoolsRow.innerHTML = `
-    <td><strong>Schools in Buffer</strong></td>
-    <td>${schoolsInBuffer}</td>
-  `;
-  tbody.appendChild(schoolsRow);
-
-  const hospitalsRow = document.createElement("tr");
-  hospitalsRow.innerHTML = `
-    <td><strong>Hospitals in Buffer</strong></td>
-    <td>${hospitalsInBuffer}</td>
-  `;
-  tbody.appendChild(hospitalsRow);
-
+  rows.forEach(({ label, value }) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td><strong>${label}</strong></td>
+      <td>${value}</td>
+    `;
+    tbody.appendChild(row);
+  });
 }
 
 
