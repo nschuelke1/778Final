@@ -115,7 +115,8 @@ fetch("/data/Wisconsin_Dams.geojson")
           weight: 1
         });
       }
-    })
+    }).addTo(map); // 
+
     checkAllLayersLoaded();
   });
 
@@ -211,7 +212,7 @@ function checkAllLayersLoaded() {
   layersLoaded++;
   console.log(`Layers loaded: ${layersLoaded}`);
 
-  if (layersLoaded >= 6) {
+  if (layersLoaded === 7) {
     const overlayMaps = {
       "Lakes & Rivers": riversLayer,
       "Watersheds": watershedsLayer,
