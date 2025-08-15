@@ -41,7 +41,6 @@ let riversLayer;
 let watershedsLayer;
 let damsLayer;
 let bufferLayer = null;
-let layersLoaded = 0;
 let schoolLayerGroup = L.layerGroup();
 let hospitalsLayer;
 let parcelLayer = L.layerGroup().addTo(map);
@@ -49,128 +48,112 @@ let elevationPoints = [];
 let elevationMarkers = [];
 let parcelGeoJSON;
 
+/////////////////////////////////////////////////////////////////////////////
+// Popup generator for all layers (multi-source name support)
+function makePopup(properties) {
+  const name =
+    properties.SCHOOL ||
+    properties.FACILITY_NAME ||
+    properties.WSHED_NAME ||
+    properties.OFFICIAL_NAME;
 
+  if (name) {
+    return `<strong>${name}</strong>`;
+  }
 
-
+  return `<em>No name available</em>`;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // Function to load a GeoJSON file and apply styling and popup logic
 function loadGeoJSON(url, styleOptions, callback) {
-
-  // Fetch the GeoJSON file from the provided URL
   fetch(url)
-    .then((response) => response.json()) // Parse the response as JSON
+    .then((response) => response.json())
     .then((data) => {
-
-      // Create a Leaflet GeoJSON layer using the loaded data
       const layer = L.geoJSON(data, {
-
-        // For point features (like dams), convert them to circle markers
         pointToLayer: function (feature, latlng) {
           return L.circleMarker(latlng, {
-
-            // Radius adjusts based on zoom level for visibility
             radius: getRadius(map.getZoom()),
-
-            // Apply custom color and fill settings from styleOptions
             color: styleOptions.color || "#000",
             fillColor: styleOptions.fillColor || styleOptions.color || "#000",
             fillOpacity: styleOptions.fillOpacity || 0.8,
             weight: styleOptions.weight || 1
           });
         },
-
-        // Apply styling to line and polygon features
         style: styleOptions,
-        
-        // Bind popups only if onEachFeature is provided in styleOptions
-        // This prevents automatic popup binding unless explicitly requested (e.g. for watersheds)
-        onEachFeature: styleOptions.onEachFeature || null
+        onEachFeature: function (feature, layer) {
+          layer.bindPopup(makePopup(feature.properties));
+        }
       });
 
-      // If a callback function was provided, pass the layer back
       if (callback) callback(layer);
     })
-    .catch((error) => console.error("Error loading GeoJSON:", error)); // Log any loading errors
+    .catch((error) => console.error("Error loading GeoJSON:", error));
 }
-
-
-
 
 /////////////////////////////////////////////////////////////////////////////
 // Load each layer and check when done
-// Load Lakes and Large Rivers  
+
+// Lakes & Large Rivers
 loadGeoJSON("data/Lakes_Large_Rivers.geojson", { color: "#0077b6", weight: 2 }, function (layer) {
   riversLayer = layer;
   checkAllLayersLoaded();
-  console.log("Layers loaded:", layersLoaded);
 });
 
-// Load Watersheds
-loadGeoJSON(
-  "data/Watersheds.geojson",
-  {
-    color: "#34a853",
-    weight: 1,
-    fillOpacity: 0.2
-  },
-  function (layer) {
-    watershedsLayer = layer;
-    checkAllLayersLoaded();
-  },
-  function onEachFeature(feature, layer) {
-    if (feature.properties && feature.properties.name) {
-      layer.bindPopup(`<strong>Watershed:</strong> ${feature.properties.name}`);
-    }
-  }
-);
+// Watersheds
+loadGeoJSON("data/Watersheds.geojson", {
+  color: "#34a853",
+  weight: 1,
+  fillOpacity: 0.2
+}, function (layer) {
+  watershedsLayer = layer;
+  checkAllLayersLoaded();
+});
 
-// Load Dams
-loadGeoJSON("data/Wisconsin_Dams.geojson", { color: "#d22e2e", weight: 1, fillOpacity: 0.8 }, function (layer) {
+// Dams
+loadGeoJSON("data/Wisconsin_Dams.geojson", {
+  color: "#d22e2e",
+  weight: 1,
+  fillOpacity: 0.8
+}, function (layer) {
   damsLayer = layer;
   checkAllLayersLoaded();
 });
 
-// Load Public Schools
+// Public Schools
 loadGeoJSON("data/PublicSchools.geojson", {
-  color: "#1e90ff", 
-  radius: 2,        
-  fillOpacity: 0.7,
-  onEachFeature: function (feature, layer) {
-    feature.properties.school_type = "Public"; 
-    layer.bindPopup(`${feature.properties.name} (Public)`); 
-  }
-}, function (layer) {
-  // Add each school marker into the unified school layer group
-  layer.eachLayer(l => schoolLayerGroup.addLayer(l));
-
-  checkAllLayersLoaded();
-});
-
-//Load Private Schools
-loadGeoJSON("data/PrivateSchools.geojson", {
-  color: "#1e90ff", 
+  color: "#1e90ff",
   radius: 2,
   fillOpacity: 0.7,
   onEachFeature: function (feature, layer) {
-    feature.properties.school_type = "Private"; 
-    layer.bindPopup(`${feature.properties.name} (Private)`); 
+    feature.properties.school_type = "Public";
+    layer.bindPopup(makePopup(feature.properties));
   }
 }, function (layer) {
-  layer.eachLayer(l => schoolLayerGroup.addLayer(l)); 
+  layer.eachLayer(l => schoolLayerGroup.addLayer(l));
   checkAllLayersLoaded();
 });
 
-// Load Hospitals
-loadGeoJSON("data/WisconsinHospitals.geojson", {
-  color: "#ffa500",      
-  radius: 2,             
+// Private Schools
+loadGeoJSON("data/PrivateSchools.geojson", {
+  color: "#1e90ff",
+  radius: 2,
   fillOpacity: 0.7,
   onEachFeature: function (feature, layer) {
-    layer.bindPopup(`${feature.properties.name || "Hospital"}`);
+    feature.properties.school_type = "Private";
+    layer.bindPopup(makePopup(feature.properties));
   }
 }, function (layer) {
-  // Add to global hospitalsLayer so it appears in overlay controls
+  layer.eachLayer(l => schoolLayerGroup.addLayer(l));
+  checkAllLayersLoaded();
+});
+
+// Hospitals
+loadGeoJSON("data/WisconsinHospitals.geojson", {
+  color: "#ffa500",
+  radius: 2,
+  fillOpacity: 0.7
+}, function (layer) {
   hospitalsLayer = layer;
   checkAllLayersLoaded();
 });
