@@ -9,7 +9,7 @@ const esriApiKey = "AAPTxy8BH1VEsoebNVZXo8HurA_2jA8sPPf_DuV7jRLl5PwtnXSU0EiBd11S
 
 
 //////Initialize the map and Base Layers/////////////////////////////////////
-var map = L.map("map").setView([48.0, -89.5], 7); // Centered over Wisconsin
+var map = L.map("map").setView([45.0, -89.5], 7); // Centered over Wisconsin
 
 // Add a base map layer (OpenStreetMap)
 // Define base maps
@@ -115,11 +115,9 @@ loadGeoJSON("data/Watersheds.geojson", {
 loadGeoJSON("data/Wisconsin_Dams.geojson", {
   color: "#d22e2e",
   weight: 1,
-  fillOpacity: 0.8,
-  onEachFeature: function () {
-    // No popup for dams
-  }
+  fillOpacity: 0.8
 }, function (layer) {
+  layer.eachLayer(l => l.unbindPopup()); // ← This removes all popups
   damsLayer = layer;
   checkAllLayersLoaded();
 });
