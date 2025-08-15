@@ -174,7 +174,7 @@ demLayer.on("load", () => {
 // Function to check if all layers are loaded
 function checkAllLayersLoaded() {
   layersLoaded++;
-  if (layersLoaded === 7) {
+  if (layersLoaded === 8) {
     const overlayMaps = {
       "Lakes & Rivers": riversLayer,
       "Watersheds": watershedsLayer,
