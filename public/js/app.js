@@ -64,7 +64,7 @@ function addGeoJSONLayer(url, options, callback) {
 }
 
 ///// Lakes & Large Rivers /////
-riversLayer = addGeoJSONLayer("data/Wisconsin_Rivers.geojson", {
+riversLayer = addGeoJSONLayer("data/Lakes_Large_Rivers.geojson", {
   style: {
     color: "#3498db",
     weight: 2
