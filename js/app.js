@@ -52,6 +52,7 @@ let parcelGeoJSON;
 
 
 
+
 /////////////////////////////////////////////////////////////////////////////
 // Function to load a GeoJSON file and apply styling and popup logic
 function loadGeoJSON(url, styleOptions, callback) {
@@ -161,12 +162,17 @@ loadGeoJSON("data/WisconsinHospitals.geojson", {
   checkAllLayersLoaded();
 });
 
+const demLayer = L.esri.imageMapLayer({
+  url: "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer",
+  opacity: 0.9,
+  attribution: "WI DNR LiDAR DEM"
+});
 
-
+checkAllLayersLoaded();
 
 function checkAllLayersLoaded() {
   layersLoaded++;
-  if (layersLoaded === 6) {
+  if (layersLoaded === 7) {
     const overlayMaps = {
       "Lakes & Rivers": riversLayer,
       "Watersheds": watershedsLayer,
@@ -174,6 +180,7 @@ function checkAllLayersLoaded() {
       "Schools": schoolLayerGroup,
       "Hospitals": hospitalsLayer,
       "Parcels (Buffer Results)": parcelLayer,
+      "Elevation (LiDAR DEM)": demLayer,
       
     };
 
@@ -228,19 +235,22 @@ document.addEventListener("DOMContentLoaded", () => {
       bufferLayer = null;
       parcelLayer.clearLayers(); // Since it's a LayerGroup
 
+      // Clear elevation markers
+      elevationMarkers.forEach(marker => map.removeLayer(marker));
+      elevationMarkers = [];
+
       // Clear the results table
       const resultsTableBody = document.querySelector("#resultsTable tbody");
       if (resultsTableBody) {
         resultsTableBody.innerHTML = "";
       }
 
-      console.log("Buffer and parcel layers cleared. Table reset.");
+      console.log("Buffer, parcel, and elevation layers cleared. Table reset.");
     });
   } else {
     console.warn("Clear Results button not found in DOM.");
   }
 });
-
 
 
 
@@ -362,15 +372,17 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
   const clickHandler = async function (e) {
     const { lat, lng } = e.latlng;
 
-    // USGS Elevation Point Query Service
-    const url = `https://nationalmap.gov/epqs/pqs.php?x=${lng}&y=${lat}&units=Meters&output=json`;
+  // Use CORS proxy to bypass fetch block
+  const proxy = "https://corsproxy.io/?";
+  const url = `${proxy}https://nationalmap.gov/epqs/pqs.php?x=${lng}&y=${lat}&units=Meters&output=json`;
 
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
 
-      const elevation = data.USGS_Elevation_Point_Query_Service.Elevation_Query.Elevation;
-      points.push({ latlng: e.latlng, elevation });
+    const elevation = data.USGS_Elevation_Point_Query_Service.Elevation_Query.Elevation;
+    points.push({ latlng: e.latlng, elevation });
+
 
       // Mark the clicked point
       const marker = L.circleMarker(e.latlng, {
@@ -378,6 +390,8 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
         color: "#ff0000",
         fillOpacity: 0.6
       }).addTo(map);
+
+      elevationMarkers.push(marker);
 
       marker.bindPopup(`Elevation: ${elevation.toFixed(2)} m`).openPopup();
 
