@@ -71,132 +71,93 @@ function makePopup(properties) {
 // Load each layer and check when done
 
 ///// Lakes & Large Rivers
-fetch("/data/Lakes_Large_Rivers.geojson")
-  .then(res => res.json())
-  .then(data => {
-    riversLayer = L.geoJSON(data, {
-      style: { color: "#0077b6", weight: 2 },
-      onEachFeature: (feature, layer) => {
-        if (feature.properties.OFFICIAL_NAME) {
-          layer.bindPopup(`<strong>River:</strong> ${feature.properties.OFFICIAL_NAME}`);
-        }
-      }
-    })
-    checkAllLayersLoaded();
-  });
+riversLayer = L.geoJSON("data/Wisconsin_Rivers.geojson", {
+  style: {
+    color: "#3498db",
+    weight: 2
+  }
+}).addTo(map);
+checkAllLayersLoaded();
 
-
-///// Watersheds
-fetch("/data/Watersheds.geojson")
-  .then(res => res.json())
-  .then(data => {
-    watershedsLayer = L.geoJSON(data, {
-      style: { color: "#34a853", weight: 1, fillOpacity: 0.2 },
-      onEachFeature: (feature, layer) => {
-        if (feature.properties.WSHED_NAME) {
-          layer.bindPopup(`<strong>Watershed:</strong> ${feature.properties.WSHED_NAME}`);
-        }
-      }
-    })
-    checkAllLayersLoaded();
-  });
-
+///// Watersheds /////
+watershedsLayer = L.geoJSON("data/Wisconsin_Watersheds.geojson", {
+  style: {
+    color: "#8e44ad",
+    weight: 1,
+    fillOpacity: 0.3
+  }
+}).addTo(map);
+checkAllLayersLoaded();
 
 ///// Dams /////
-fetch("/data/Wisconsin_Dams.geojson")
-  .then(res => res.json())
-  .then(data => {
-    damsLayer = L.geoJSON(data, {
-      pointToLayer: (feature, latlng) => {
-        return L.circleMarker(latlng, {
-          radius: getRadius(map.getZoom()),
-          color: "#d22e2e",
-          fillColor: "#d22e2e",
-          fillOpacity: 0.8,
-          weight: 1
-        });
-      },
-      onEachFeature: (feature, layer) => {
-       
-      }
-    }).addTo(map);
-
-    checkAllLayersLoaded();
-  });
-
+damsLayer = L.geoJSON("data/Wisconsin_Dams.geojson", {
+  pointToLayer: (feature, latlng) => {
+    return L.circleMarker(latlng, {
+      radius: getRadius(map.getZoom()),
+      color: "#d22e2e",
+      fillColor: "#d22e2e",
+      fillOpacity: 0.8,
+      weight: 1
+    });
+  }
+}).addTo(map);
+checkAllLayersLoaded();
 
 ///// Public Schools /////
-fetch("/data/PublicSchools.geojson")
-  .then(res => res.json())
-  .then(data => {
-    const publicSchools = L.geoJSON(data, {
-      pointToLayer: (feature, latlng) => {
-        return L.circleMarker(latlng, {
-          radius: 2,
-          color: "#1e90ff",
-          fillColor: "#1e90ff",
-          fillOpacity: 0.7
-        });
-      },
-      onEachFeature: (feature, layer) => {
-        if (feature.properties.SCHOOL) {
-          layer.bindPopup(`<strong>School:</strong> ${feature.properties.SCHOOL}`);
-        }
-      }
+const publicSchoolsLayer = L.geoJSON("data/PublicSchools.geojson", {
+  pointToLayer: (feature, latlng) => {
+    return L.circleMarker(latlng, {
+      radius: 2,
+      color: "#1e90ff",
+      fillColor: "#1e90ff",
+      fillOpacity: 0.7
     });
+  },
+  onEachFeature: (feature, layer) => {
+    if (feature.properties.SCHOOL) {
+      layer.bindPopup(`<strong>Public School:</strong> ${feature.properties.SCHOOL}`);
+    }
+  }
+}).addTo(map);
 
-    publicSchools.eachLayer(l => schoolLayerGroup.addLayer(l));
-    checkAllLayersLoaded();
-  });
+publicSchoolsLayer.eachLayer(l => schoolLayerGroup.addLayer(l));
+checkAllLayersLoaded();
 
 
 ///// Private Schools /////
-fetch("/data/PrivateSchools.geojson")
-  .then(res => res.json())
-  .then(data => {
-    const privateSchools = L.geoJSON(data, {
-      pointToLayer: (feature, latlng) => {
-        return L.circleMarker(latlng, {
-          radius: 2,
-          color: "#1e90ff",
-          fillColor: "#1e90ff",
-          fillOpacity: 0.7
-        });
-      },
-      onEachFeature: (feature, layer) => {
-        if (feature.properties.SCHOOL) {
-          layer.bindPopup(`<strong>School:</strong> ${feature.properties.SCHOOL}`);
-        }
-      }
+const privateSchoolsLayer = L.geoJSON("data/PrivateSchools.geojson", {
+  pointToLayer: (feature, latlng) => {
+    return L.circleMarker(latlng, {
+      radius: 2,
+      color: "#ff7f50",
+      fillColor: "#ff7f50",
+      fillOpacity: 0.7
     });
+  },
+  onEachFeature: (feature, layer) => {
+    if (feature.properties.SCHOOL) {
+      layer.bindPopup(`<strong>Private School:</strong> ${feature.properties.SCHOOL}`);
+    }
+  }
+}).addTo(map);
 
-    privateSchools.eachLayer(l => schoolLayerGroup.addLayer(l));
-    checkAllLayersLoaded();
-  });
+privateSchoolsLayer.eachLayer(l => schoolLayerGroup.addLayer(l));
+checkAllLayersLoaded();
 
 
 ///// Hospitals /////
-fetch("/data/WisconsinHospitals.geojson")
-  .then(res => res.json())
-  .then(data => {
-    hospitalsLayer = L.geoJSON(data, {
-      pointToLayer: (feature, latlng) => {
-        return L.circleMarker(latlng, {
-          radius: 2,
-          color: "#ffa500",
-          fillColor: "#ffa500",
-          fillOpacity: 0.7
-        });
-      },
-      onEachFeature: (feature, layer) => {
-        if (feature.properties.FACILITY_NAME) {
-          layer.bindPopup(`<strong>Hospital:</strong> ${feature.properties.FACILITY_NAME}`);
-        }
-      }
-    })
-    checkAllLayersLoaded();
-  });
-
+hospitalsLayer = L.geoJSON("data/Wisconsin_Hospitals.geojson", {
+  pointToLayer: (feature, latlng) => {
+    return L.circleMarker(latlng, {
+      radius: 6,
+      color: "#2e86de",
+      fillColor: "#2e86de",
+      fillOpacity: 0.8,
+      weight: 1
+    });
+  }
+}).addTo(map);  
+checkAllLayersLoaded();
 
 ///// LiDAR DEM /////
 const demLayer = L.esri.imageMapLayer({
@@ -463,7 +424,7 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
   const clickHandler = async function (e) {
     const { lat, lng } = e.latlng;
 
-    // ✅ Use Open-Elevation API (no proxy needed)
+    // Open-Elevation API
     const url = `https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lng}`;
 
     try {
@@ -513,3 +474,4 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
   map.on("click", clickHandler);
 });
 }
+
