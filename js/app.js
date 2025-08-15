@@ -47,6 +47,7 @@ let parcelLayer = L.layerGroup().addTo(map);
 let elevationPoints = [];
 let elevationMarkers = [];
 let parcelGeoJSON;
+let layersLoaded = 0;
 
 /////////////////////////////////////////////////////////////////////////////
 // Popup generator for all layers (multi-source name support)
