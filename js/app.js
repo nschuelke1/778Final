@@ -84,7 +84,7 @@ fetch("/data/Lakes_Large_Rivers.geojson")
     checkAllLayersLoaded();
   });
 
-  
+
 ///// Watersheds
 fetch("/data/Watersheds.geojson")
   .then(res => res.json())
@@ -202,7 +202,7 @@ const demLayer = L.esri.imageMapLayer({
 
 demLayer.on("load", () => {
   console.log("DEM layer loaded");
-  checkAllLayersLoaded(); // ✅ This is what increments the counter
+  checkAllLayersLoaded(); 
 });
 
 
@@ -211,7 +211,7 @@ function checkAllLayersLoaded() {
   layersLoaded++;
   console.log(`Layers loaded: ${layersLoaded}`);
 
-  if (layersLoaded === 7) {
+  if (layersLoaded >= 6) {
     const overlayMaps = {
       "Lakes & Rivers": riversLayer,
       "Watersheds": watershedsLayer,
