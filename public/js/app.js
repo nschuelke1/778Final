@@ -79,6 +79,12 @@ watershedsLayer = addGeoJSONLayer("data/Watersheds.geojson", {
     color: "#8e44ad",
     weight: 1,
     fillOpacity: 0.3
+  },
+  onEachFeature: (feature, layer) => {
+    const name = feature.properties.WSHED_NAME;
+    if (name) {
+      layer.bindPopup(`<strong>Watershed:</strong> ${name}`);
+    }
   }
 });
 
