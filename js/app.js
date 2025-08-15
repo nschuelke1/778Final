@@ -373,18 +373,15 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
     const { lat, lng } = e.latlng;
 
   // Use CORS proxy to bypass fetch block
-  const proxy = "https://api.allorigins.win/raw?url=";
-  const url = `${proxy}https://nationalmap.gov/epqs/pqs.php?x=${lng}&y=${lat}&units=Meters&output=json`;
+  const proxy = "https://api.allorigins.win/get?url=";
+  const url = `${proxy}${encodeURIComponent(`https://nationalmap.gov/epqs/pqs.php?x=${lng}&y=${lat}&units=Meters&output=json`)}`;
 
   try {
     const response = await fetch(url);
+    const result = await response.json();
 
-    const contentType = response.headers.get("content-type");
-    if (!response.ok || !contentType.includes("application/json")) {
-      throw new Error("Invalid response format or failed request.");
-    }
-
-    const data = await response.json();
+    // ✅ Manually parse the JSON string inside `contents`
+    const data = JSON.parse(result.contents);
 
     const elevation = data.USGS_Elevation_Point_Query_Service.Elevation_Query.Elevation;
     points.push({ latlng: e.latlng, elevation });
