@@ -34,6 +34,8 @@ function getRadius(zoom) {
 
 
 console.log("Raster plugin available:", typeof L.esri.identifyImage);
+console.log("Buffer button:", document.getElementById("bufferToolBtn"));
+console.log("Elevation button:", document.getElementById("elevationToolBtn"));
 
 /////////////////////////////////////////////////////////////////////////////
 // Declare layer variables
@@ -97,7 +99,7 @@ damsLayer = addGeoJSONLayer("data/Wisconsin_Dams.geojson", {
 publicSchoolsLayer = addGeoJSONLayer("data/PublicSchools.geojson", {
   pointToLayer: (feature, latlng) => {
     return L.circleMarker(latlng, {
-      radius: 3,
+      radius: 2,
       color: "#1e90ff",
       fillColor: "#1e90ff",
       fillOpacity: 0.7
@@ -117,7 +119,7 @@ publicSchoolsLayer = addGeoJSONLayer("data/PublicSchools.geojson", {
 privateSchoolsLayer = addGeoJSONLayer("data/PrivateSchools.geojson", {
   pointToLayer: (feature, latlng) => {
     return L.circleMarker(latlng, {
-      radius: 3,
+      radius: 2,
       color: "#1e90ff",
       fillColor: "#1e90ff",
       fillOpacity: 0.7
@@ -137,9 +139,9 @@ privateSchoolsLayer = addGeoJSONLayer("data/PrivateSchools.geojson", {
 hospitalsLayer = addGeoJSONLayer("data/WisconsinHospitals.geojson", {
  pointToLayer: (feature, latlng) => {
   return L.circleMarker(latlng, {
-    radius: 3,
-    color: "#d8ee10ff",
-    fillColor: "#d8ee10ff",
+    radius: 2,
+    color: "#eea010ff",
+    fillColor: "#eea010ff",
     fillOpacity: 0.8,
     weight: 1
   });
