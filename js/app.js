@@ -102,7 +102,7 @@ fetch("/data/Watersheds.geojson")
   });
 
 
-///// Dams
+///// Dams /////
 fetch("/data/Wisconsin_Dams.geojson")
   .then(res => res.json())
   .then(data => {
@@ -115,14 +115,17 @@ fetch("/data/Wisconsin_Dams.geojson")
           fillOpacity: 0.8,
           weight: 1
         });
+      },
+      onEachFeature: (feature, layer) => {
+       
       }
-    }).addTo(map); // 
+    }).addTo(map);
 
     checkAllLayersLoaded();
   });
 
 
-///// Public Schools
+///// Public Schools /////
 fetch("/data/PublicSchools.geojson")
   .then(res => res.json())
   .then(data => {
@@ -147,7 +150,7 @@ fetch("/data/PublicSchools.geojson")
   });
 
 
-///// Private Schools
+///// Private Schools /////
 fetch("/data/PrivateSchools.geojson")
   .then(res => res.json())
   .then(data => {
@@ -172,7 +175,7 @@ fetch("/data/PrivateSchools.geojson")
   });
 
 
-///// Hospitals
+///// Hospitals /////
 fetch("/data/WisconsinHospitals.geojson")
   .then(res => res.json())
   .then(data => {
@@ -195,7 +198,7 @@ fetch("/data/WisconsinHospitals.geojson")
   });
 
 
-///// LiDAR DEM
+///// LiDAR DEM /////
 const demLayer = L.esri.imageMapLayer({
   url: "https://dnrmaps.wi.gov/arcgis_image/rest/services/DW_Elevation/EN_DEM_from_LiDAR_Feet/ImageServer",
   opacity: 0.9,
