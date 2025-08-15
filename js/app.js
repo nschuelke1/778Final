@@ -373,7 +373,7 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
     const { lat, lng } = e.latlng;
 
   // Use CORS proxy to bypass fetch block
-  const proxy = "https://corsproxy.io/?";
+  const proxy = "https://api.allorigins.win/raw?url=";
   const url = `${proxy}https://nationalmap.gov/epqs/pqs.php?x=${lng}&y=${lat}&units=Meters&output=json`;
 
   try {
