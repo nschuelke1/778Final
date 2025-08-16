@@ -84,6 +84,12 @@ riversLayer = addGeoJSONLayer("data/Lakes_Large_Rivers.geojson", {
   style: {
     color: "#3498db",
     weight: 2
+  },
+  onEachFeature: (feature, layer) => {
+    const name = feature.properties.OFFICIAL_NAME;
+    if (name) {
+      layer.bindPopup(`<strong>Name:</strong> ${name}`);
+    }
   }
 }, null, false);
 
