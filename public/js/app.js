@@ -166,7 +166,7 @@ privateSchoolsLayer = addGeoJSONLayer("data/PrivateSchools.geojson", {
   layer.eachLayer(l => schoolLayerGroup.addLayer(l));
 }, false);
 
-
+///// Hospitals /////
 hospitalsLayer = addGeoJSONLayer("data/WisconsinHospitals.geojson", {
   pointToLayer: (feature, latlng) => {
     return L.circleMarker(latlng, {
