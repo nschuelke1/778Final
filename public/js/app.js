@@ -17,12 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-
-
-// Esri API Key for elevation service
-const esriApiKey = "AAPTxy8BH1VEsoebNVZXo8HurA_2jA8sPPf_DuV7jRLl5PwtnXSU0EiBd11SD4M-Bxw0hCcLfTFwvO8qMU69LnIuTXBc20px1QrO2YvAWh7qW4shtxgRBGkvOKbSUxG1UlsSq_rjYNW_BU84JuypUijxgbvAm3J6aFLqyZGnWiBq7w9CtuCohALUyjkCrONoQ-r1P_V8vvLTifb8V0eWMt4rGV0IiA4QE-WtX_zxA8uL3jaikZCbKD6Gd0xtXh9N9zn6AT1_agURHDlj"; 
-
-
 //////Initialize the map and Base Layers/////////////////////////////////////
 var map = L.map("map").setView([45.0, -89.5], 7); // Centered over Wisconsin
 
