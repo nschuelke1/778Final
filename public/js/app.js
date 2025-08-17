@@ -27,11 +27,12 @@ const esriApiKey = "AAPTxy8BH1VEsoebNVZXo8HurA_2jA8sPPf_DuV7jRLl5PwtnXSU0EiBd11S
 var map = L.map("map").setView([45.0, -89.5], 7); // Centered over Wisconsin
 
 // Add a base map layer (OpenStreetMap)
-// Define base maps
+// Open Street Map
 const osmBase = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap Contributors"
 });
 
+// Satellite imagery 
 const satelliteBase = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
   attribution: "© Esri & contributors"
 });
@@ -46,11 +47,23 @@ function getRadius(zoom) {
   return Math.max(1.5, zoom * 0.3); // Adjust radius based on zoom level
 }
 
+// Adjust dam marker radius based on zoom level
+map.on("zoomend", function () {
+  if (damsLayer) {
+    damsLayer.eachLayer(function (layer) {
+      if (layer.setRadius) {
+        layer.setRadius(getRadius(map.getZoom()));
+      }
+    });
+  }
+});
+
 
 
 console.log("Raster plugin available:", typeof L.esri.identifyImage);
 console.log("Buffer button:", document.getElementById("bufferToolBtn"));
 console.log("Elevation button:", document.getElementById("elevationToolBtn"));
+
 
 /////////////////////////////////////////////////////////////////////////////
 // Declare layer variables
@@ -68,7 +81,7 @@ let layersLoaded = 0;
 let layerControlAdded = false;
 
 
-
+// Load a GeoJSON layer from a URL, run a callback when it's ready, and optionally add it to the map
 function addGeoJSONLayer(url, options, callback, addToMap = false) {
   const layer = new L.GeoJSON.AJAX(url, options);
   layer.on("data:loaded", () => {
@@ -121,6 +134,7 @@ damsLayer = addGeoJSONLayer("data/Wisconsin_Dams.geojson", {
   }
 }, null, true); // Only one added to map on load
 
+///// Public Schools /////
 publicSchoolsLayer = addGeoJSONLayer("data/PublicSchools.geojson", {
   pointToLayer: (feature, latlng) => {
     return L.circleMarker(latlng, {
@@ -139,6 +153,7 @@ publicSchoolsLayer = addGeoJSONLayer("data/PublicSchools.geojson", {
   layer.eachLayer(l => schoolLayerGroup.addLayer(l));
 }, false);
 
+///// Private Schools /////
 privateSchoolsLayer = addGeoJSONLayer("data/PrivateSchools.geojson", {
   pointToLayer: (feature, latlng) => {
     return L.circleMarker(latlng, {
@@ -184,10 +199,12 @@ demLayer.on("load", () => {
 
 
 /////////////////////////////////////////////////////////////////////////////
+// Track when all layers are loaded, then add layer control to the map
 function checkAllLayersLoaded() {
   layersLoaded++;
   console.log(`Layers loaded: ${layersLoaded}`);
 
+  // Once all expected layers are loaded, add the layer toggle UI
   if (layersLoaded >= 6 && !layerControlAdded) {
     layerControlAdded = true; 
 
@@ -212,21 +229,10 @@ function checkAllLayersLoaded() {
 }
 
 
-/////////////////////////////////////////////////////////////////////////////
-map.on("zoomend", function () {
-  if (damsLayer) {
-    damsLayer.eachLayer(function (layer) {
-      if (layer.setRadius) {
-        layer.setRadius(getRadius(map.getZoom()));
-      }
-    });
-  }
-});
-
+// Check if user's click is close enough to a dam marker
 function isCloseEnough(clickLatLng, layerLatLng, thresholdMeters = 20) {
   return clickLatLng.distanceTo(layerLatLng) <= thresholdMeters;
 }
-
 
 
 
@@ -281,18 +287,22 @@ function displayParcelSummary(features, schoolsInBuffer = 0, hospitalsInBuffer =
   let totalValue = 0;
   let totalAcres = 0;
 
+  // Loop through each parcel feature and accumulate market value and acreage
   features.forEach((feature) => {
     const props = feature.properties;
     const value = parseFloat(props.ESTFMKVALUE);
     const acres = parseFloat(props.GISACRES);
 
+    // Only add values if they are valid numbers
     if (!isNaN(value)) totalValue += value;
     if (!isNaN(acres)) totalAcres += acres;
   });
 
+  // Select the table body element where results will be displayed
   const tbody = document.querySelector("#resultsTable tbody");
   tbody.innerHTML = ""; // Clear all rows
 
+  // Create an array of summary rows to be added to the table
   const rows = [
     { label: "Total Market Value ($)", value: totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) },
     { label: "Total Acres", value: totalAcres.toFixed(2) },
@@ -300,6 +310,7 @@ function displayParcelSummary(features, schoolsInBuffer = 0, hospitalsInBuffer =
     { label: "Hospitals in Buffer", value: hospitalsInBuffer }
   ];
 
+  // Create and insert each row into the table
   rows.forEach(({ label, value }) => {
     const row = document.createElement("tr");
     row.innerHTML = `
@@ -341,6 +352,7 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
         if (bufferLayer) map.removeLayer(bufferLayer);
         if (parcelLayer) map.removeLayer(parcelLayer);
 
+
         // Add buffer to map
         bufferLayer = L.geoJSON(buffer, {
           style: { color: "#ffa500", weight: 2, fillOpacity: 0.4 }
@@ -350,17 +362,19 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
         let hospitalsInBuffer = 0;
         let schoolsInBuffer = 0;
 
+        // Count hospitals inside the buffer zone
         hospitalsLayer.eachLayer((layer) => {
-          const point = layer.toGeoJSON();
+          const point = layer.toGeoJSON(); // Convert Leaflet layer to GeoJSON point
           if (turf.booleanPointInPolygon(point, buffer)) {
-            hospitalsInBuffer++;
+            hospitalsInBuffer++; // Increment counter
           }
         });
 
+        // Count schools inside the buffer zone
         schoolLayerGroup.eachLayer((layer) => {
-          const point = layer.toGeoJSON();
+          const point = layer.toGeoJSON(); // Convert Leaflet layer to GeoJSON point
           if (turf.booleanPointInPolygon(point, buffer)) {
-            schoolsInBuffer++;
+            schoolsInBuffer++; // Increment counter
           }
         });
 
@@ -375,6 +389,7 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
             return;
           }
 
+          // Create and add parcel polygons to the map with styling and popups
           parcelLayer = L.geoJSON(featureCollection, {
             style: { color: "#008000", weight: 1, fillOpacity: 0.2 },
             onEachFeature: function (feature, layer) {
@@ -410,11 +425,13 @@ document.getElementById("bufferToolBtn").addEventListener("click", () => {
 
 
 ////// ELEVATION TOOL //////////////////////////////////////////////////
+// Listen for "Elevation Tool" button click
 document.getElementById("elevationToolBtn").addEventListener("click", () => {
   elevationPoints = [];
 
   alert("Click two points on the map to compare elevation.");
 
+  // Define click handler for elevation sampling
   const clickHandler = async function (e) {
     const { lat, lng } = e.latlng;
 
@@ -422,6 +439,7 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
     const url = `https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lng}`;
 
     try {
+      // Fetch elevation data from API
       const response = await fetch(url);
       const result = await response.json();
 
@@ -437,6 +455,7 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
 
       elevationMarkers.push(marker);
 
+      // Show elevation in popup
       marker.bindPopup(`Elevation: ${elevation.toFixed(2)} m`).openPopup();
 
       // If two points are selected, compare
@@ -445,6 +464,7 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
         const distance = elevationPoints[0].latlng.distanceTo(elevationPoints[1].latlng) / 1000;
         const slope = (diff / (distance * 1000)) * 100; // percent
 
+       // Display elevation comparison in a popup at second point
        L.popup()
         .setLatLng(elevationPoints[1].latlng)
         .setContent(`
@@ -465,7 +485,10 @@ document.getElementById("elevationToolBtn").addEventListener("click", () => {
     }
   };
 
+  // Start listening for map clicks to collect elevation points
   map.on("click", clickHandler);
 });
+
+
 
 
